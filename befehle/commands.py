@@ -1,12 +1,23 @@
 import asyncio
+from typing import Any, Optional, Union
 import discord
+from discord.emoji import Emoji
+from discord.enums import ButtonStyle
 from discord.ext import commands
 from discord import app_commands
 import datetime
 
-class TicketButton(discord.ui.button()):
-    def __init__(self, text,buttonstyle):
-        super().__init__(label=text, style=buttonstyle)
+class TicketButton(discord.ui.Button):
+    def __init__(self, text, discordbuttonstyle):
+        super().__init__(label=text, style=discordbuttonstyle)
+
+    async def callback(self, interaction: discord.Interaction) -> Any:
+
+        channel = interaction.channel
+        person = interaction.user.mention
+        await channel.create_thread(name="test", type=None, message=person + " hat ein ticket erstellt")
+
+        await interaction.response.send_message("Dein ticket ist in dem Thread:", ephemeral=True)
 
 class TicketView(discord.ui.View):
     def __init__(self):
@@ -30,11 +41,11 @@ class ModCommands(discord.app_commands.Group):
         print(user)
     @app_commands.command(name="ticketchannel", description="Lege den Kanal für die Tickets fest.")
     @commands.cooldown(1, 20, commands.BucketType.user)
-    async def ticket_channel(self, ctx, channel: discord.TextChannel, titel: str):
-        await ctx.response.defer()
+    async def ticket_channel(self, ctx, interaction, channel: discord.TextChannel, titel: str):
+        await interaction.response.defer()
         print(channel.id)
         embed = discord.Embed(title=titel, description="Klicke auf den unteren Knopf um ein " + titel + " ticket zu erstellen.", color=0x0094ff)
-        await ctx.followup.send("erstellt")
+        await interaction.response.send_message("erstellt", ephemeral=True)
         Channel = ctx.guild.get_channel(channel.id)
         await Channel.send(embed=embed, view=TicketView())
 
