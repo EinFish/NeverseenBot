@@ -12,12 +12,16 @@ class TicketButton(discord.ui.Button):
         super().__init__(label=text, style=discordbuttonstyle)
 
     async def callback(self, interaction: discord.Interaction) -> Any:
-
-        channel = interaction.channel
+        Channel = interaction.channel
         person = interaction.user.mention
-        await channel.create_thread(name="test", type=None, message=person + " hat ein ticket erstellt")
-
-        await interaction.response.send_message("Dein ticket ist in dem Thread:", ephemeral=True)
+        id = interaction.user.id
+        await Channel.create_thread(name=interaction.user.display_name)
+        jump = discord.Thread.jump_url
+        print(jump)
+        await interaction.response.send_message(content=jump , ephemeral=True)
+        await discord.Thread.send(content=person)
+        await discord.Thread.add_user(user=interaction.user.id(id))
+     #   await discord.Thread.send(content=person)
 
 class TicketView(discord.ui.View):
     def __init__(self):
@@ -39,17 +43,19 @@ class ModCommands(discord.app_commands.Group):
     async def delete(self, ctx, user: discord.Member):
         await ctx.response.defer()
         print(user)
+
+
     @app_commands.command(name="ticketchannel", description="Lege den Kanal für die Tickets fest.")
     @commands.cooldown(1, 20, commands.BucketType.user)
-    async def ticket_channel(self, ctx, interaction, channel: discord.TextChannel, titel: str):
+    async def ticket_channel(self, interaction, channel: discord.TextChannel, titel: str):
         await interaction.response.defer()
         print(channel.id)
         embed = discord.Embed(title=titel, description="Klicke auf den unteren Knopf um ein " + titel + " ticket zu erstellen.", color=0x0094ff)
-        await interaction.response.send_message("erstellt", ephemeral=True)
-        Channel = ctx.guild.get_channel(channel.id)
-        await Channel.send(embed=embed, view=TicketView())
-
-
+       # await interaction.response.send_message("erstellt", ephemeral=True)
+        await interaction.followup.send(content="erstellt", ephemeral=True)
+      #  Channel = ctx.guild.get_channel(channel.id)
+        Channel2 = interaction.channel
+        await Channel2.send(embed=embed, view=TicketView())
 
 
     @app_commands.command(name="ban", description="Banne einen Member")
