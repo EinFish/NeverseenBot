@@ -6,16 +6,29 @@ from discord.enums import ButtonStyle
 from discord.ext import commands
 from discord import app_commands
 import datetime
+from discord.interactions import Interaction
 
 from discord.utils import MISSING
 
 
+
+class EmbedBuilder(discord.ui.Modal):
+    def __init__(self) -> None:
+        super().__init__(title="Embed Builder")
+    titel = discord.ui.TextInput(label="Titel:", placeholder="Setzte einen Titel", style=discord.TextStyle.short)
+  #  farbe = discord.ui.TextInput(label="Farbe:", placeholder="Bitte einen Hex farbcode ohne #", style=discord.TextStyle.short)
+    description = discord.ui.TextInput(label="Beschreibung", placeholder="Füge eine Beschreibung hinzu", style=discord.TextStyle.long, max_length=1500, required=False)    
+    
+
+    async def on_submit(self, interaction) -> None:
+        embed = discord.Embed(title=EmbedBuilder.titel, color=0x0094ff, description=EmbedBuilder.description)
+        await interaction.response.defer()
+        await interaction.followup.send(embed=embed)
+
 class TicketModal(discord.ui.Modal):
     def __init__(self) -> None:
         super().__init__(title="Problembeschreibung:")
-
     problem = discord.ui.TextInput(label="Was ist dein Anliegen?", placeholder="Problem", required=True, style=discord.TextStyle.short, max_length=100, min_length=10)
-
     async def on_submit(self, interaction) -> None:
         mod = "<@&1063569606658248746>"
         Channel = interaction.channel
@@ -26,15 +39,12 @@ class TicketModal(discord.ui.Modal):
         embed = discord.Embed(color=0x0094ff, timestamp=datetime.datetime.now(), title=self.problem, description=interaction.user.mention + " bitte beschreibe dein Problem näher. Es wird sich bald ein Team Mitglied um dein Problem kümmern.")
         await Thread.send(content=person + mod, embed=embed)
         
-
-
 class TicketButton(discord.ui.Button):
     def __init__(self, text, discordbuttonstyle):
         super().__init__(label=text, style=discordbuttonstyle)
 
     async def callback(self, interaction: discord.Interaction) -> Any:
         await interaction.response.send_modal(TicketModal())
-
 
 class TicketView(discord.ui.View):
     def __init__(self):
@@ -47,7 +57,7 @@ class FunCommands(discord.app_commands.Group):
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def twich(self, ctx):
         await ctx.response.defer()
-        embed = discord.Embed(title="Twitch Link", description=f"https://www.twitch.tv/lefish9873", color=0x0094ff, timestamp=datetime.datetime.now())
+        embed = discord.Embed(title="Twitch Link", description=f"https://www.twitch.tv/neverseen_minecraft", color=0x0094ff, timestamp=datetime.datetime.now())
         await ctx.followup.send(embed=embed)
 
     @app_commands.command(name="play-music", description="Spielt einen ausgewählten Song.")
@@ -93,6 +103,13 @@ class ModCommands(discord.app_commands.Group):
     async def on_member_unban(self, guild, user: discord.User, reason: str):
         print("unban")
         await guild.unban(user, reason=reason)
+
+
+    @app_commands.command(name="embed-builder", description="Baue ein Embed in einem Formular!")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def embedbuilder(self, interaction):
+        await interaction.response.send_modal(EmbedBuilder())
+
 class HelpView(discord.ui.View):
     def __init__(self, client, timeout=3600):
         super().__init__(timeout=timeout)
