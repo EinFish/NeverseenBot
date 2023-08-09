@@ -6,11 +6,37 @@ from discord.enums import ButtonStyle
 from discord.ext import commands
 from discord import app_commands
 import datetime
-from discord.interactions import Interaction
-
-from discord.utils import MISSING
 
 
+class TicketButtons(discord.ui.Button):
+    def __init__(self, text, discordbuttonstyle, mode):
+        super().__init__(label=text, style=discordbuttonstyle)
+        self.mode = mode
+
+    async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+
+        if self.mode == 0:
+            await interaction.channel.edit(locked=True)
+            #await interaction.channel.remove_user()
+            print(interaction.channel.last_message.content)
+            content = interaction.channel.last_message.content.split(',')
+            content2 = content[0]
+            content3 = content2[2:20]
+            content4 = int(content3)
+            member = interaction.channel.fetch_member(content4)
+            await interaction.channel.remove_user(member)
+
+
+
+        if self.mode == 1:
+           pass 
+
+class TicketView2(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+        self.add_item(TicketButtons("Ticket schließen", discord.ButtonStyle.danger, 0))
+        self.add_item(TicketButtons("Ticket Beanspruchen", discord.ButtonStyle.success, 1))
 
 class EmbedBuilder(discord.ui.Modal):
     def __init__(self) -> None:
@@ -26,18 +52,23 @@ class EmbedBuilder(discord.ui.Modal):
         await interaction.followup.send(embed=embed)
 
 class TicketModal(discord.ui.Modal):
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__(title="Problembeschreibung:")
     problem = discord.ui.TextInput(label="Was ist dein Anliegen?", placeholder="Problem", required=True, style=discord.TextStyle.short, max_length=100, min_length=10)
     async def on_submit(self, interaction) -> None:
         mod = "<@&1063569606658248746>"
         Channel = interaction.channel
-        person = interaction.user.mention
+        self.person = interaction.user.mention
         id = interaction.user.id
-        Thread = await Channel.create_thread(name=interaction.user.display_name)
-        await interaction.response.send_message(content="Dein Ticket findest du hier: " + Thread.jump_url , ephemeral=True)
+        self.Thread = await Channel.create_thread(name=interaction.user.display_name)
+        await interaction.response.send_message(content="Dein Ticket findest du hier: " + self.Thread.jump_url , ephemeral=True)
         embed = discord.Embed(color=0x0094ff, timestamp=datetime.datetime.now(), title=self.problem, description=interaction.user.mention + " bitte beschreibe dein Problem näher. Es wird sich bald ein Team Mitglied um dein Problem kümmern.")
-        await Thread.send(content=person + mod, embed=embed)
+        await self.Thread.send(content=self.person + "," + mod, embed=embed, view=TicketView2())
+
+
+
+
+
         
 class TicketButton(discord.ui.Button):
     def __init__(self, text, discordbuttonstyle):
@@ -67,7 +98,6 @@ class FunCommands(discord.app_commands.Group):
 
 
 class ModCommands(discord.app_commands.Group):
-    
     @app_commands.command(name="delete-messages", description="Lösche Nachrichten von einem Bestimmten User.")
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def delete(self, ctx, user: discord.Member):
@@ -87,22 +117,88 @@ class ModCommands(discord.app_commands.Group):
         await channel.send(embed=embed, view=TicketView())
 
 
+    @app_commands.command(name="kick", description="Kicke einen Member")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def kick(self, interaction, member: discord.Member, reason: str):
+        if interaction.user.guild_permissions.administrator:
+            channel = interaction.guild.get_channel(1063958279409115136)
+            await member.kick(reason=reason)
+            await interaction.response.send_message(content=f"Du hast {member.mention} erfolgreich gekickt", ephemeral=True)
+
+            embed = discord.Embed(title="User gekickt", description="Ein User wurde von " + interaction.user.mention + " gekickt.",color=0x0094ff, timestamp=datetime.datetime.now())
+            embed.add_field(name="Gekickt:", value=member.mention, inline=True)
+            embed.add_field(name="Von:", value=interaction.user.mention, inline=True)
+            await channel.send(embed=embed)
+
+        else:
+            await interaction.response.send_message(content="<a:catnewspaper:1096143115678662656> <a:catnewspaper:1096143115678662656> <a:catnewspaper:1096143115678662656>", ephemeral=True)
+
+
     @app_commands.command(name="ban", description="Banne einen Member")
     @commands.cooldown(1, 20, commands.BucketType.user)
-    async def on_member_ban(self, member, user: discord.Member, reason: str):
-        server = self.get_guild(1063567516737224805)
-        channel = server.get_channel(1063958279409115136)
-        embed = discord.Embed(title="User gebannt",description="Ein User wurde gebannt",color=0x0094ff, timestamp=datetime.datetime.now())
-        embed.add_field(name="Gebannt:", value=user, inline=True)
-        embed.add_field(name="Von:", value=user, inline=True)
-        await server.ban(user, reason=reason)
+    async def on_member_ban(self, interaction, user: discord.Member, reason: str):
+     channel = interaction.guild.get_channel(1063958279409115136)
+     if interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message(content=f"Du hast {user.mention} erfolgreich gebannt", ephemeral=True)
+        await user.ban(reason=reason)
+   
+        embed = discord.Embed(title="User gebannt", description="Ein User wurde von " + interaction.user.mention + " gebannt.",color=0x0094ff, timestamp=datetime.datetime.now())
+        embed.add_field(name="Gebannt:", value=user.mention, inline=True)
+        embed.add_field(name="Von:", value=interaction.user.mention, inline=True)
         await channel.send(embed=embed)
+     else:
+         await interaction.response.send_message(content="<a:catnewspaper:1096143115678662656> <a:catnewspaper:1096143115678662656> <a:catnewspaper:1096143115678662656>", ephemeral=True)
+        
 
-    @app_commands.command(name="unban", description="Entbanne einen Member")
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def on_member_unban(self, guild, user: discord.User, reason: str):
-        print("unban")
-        await guild.unban(user, reason=reason)
+    @app_commands.command(name="unban", description="Entbanne einen Nutzer")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def unban(self, interaction, user: discord.User, reason: str):
+        if interaction.user.guild_permissions.administrator:
+            channel = interaction.guild.get_channel(1063958279409115136)
+            await interaction.guild.unban(user, reason=reason)
+            await interaction.response.send_message(content=f"Du hast {user.mention} erfolgreich entbannt", ephemeral=True)
+
+            embed = discord.Embed(title="User entbannt", description="Ein User wurde von " + interaction.user.mention + " entbannt.",color=0x0094ff, timestamp=datetime.datetime.now())
+            embed.add_field(name="Entbannt:", value=user.mention, inline=True)
+            embed.add_field(name="Von:", value=interaction.user.mention, inline=True)
+            await channel.send(embed=embed)
+        else:
+            await interaction.response.send_message(content="<a:catnewspaper:1096143115678662656> <a:catnewspaper:1096143115678662656> <a:catnewspaper:1096143115678662656>", ephemeral=True)
+
+
+    @app_commands.command(name="mute", description="Schicke einen Member ins TImeout")
+    @commands.cooldown(1, 15, commands.BucketType.user)
+    async def on_member_timeout(self, interaction, member: discord.Member, reason: str, seconds: int = 1, minutes: int = 0, hours: int = 0, days: int = 0, ):
+        channel = interaction.guild.get_channel(1063958279409115136)
+        if interaction.user.guild_permissions.administrator:
+            duration = datetime.timedelta(seconds=seconds, minutes=minutes, hours= hours, days=days)
+            await interaction.response.send_message(content="Der User " + member.mention + f" wurde in ein Timeout geschickt für: {duration}", ephemeral=True)
+            await member.timeout(duration, reason=reason)
+
+            embed = discord.Embed(title="User im Timeout", description="Ein User wurde von " + interaction.user.mention + " ins Timeout versetzt.",color=0x0094ff, timestamp=datetime.datetime.now())
+            embed.add_field(name="Im Timeout:", value=member.mention, inline=True)
+            embed.add_field(name="Von:", value=interaction.user.mention, inline=True)
+            embed.add_field(name="Für:", value=duration, inline=True)
+            embed.add_field(name="Grund:", value=reason, inline=True)
+            await channel.send(embed=embed)
+        else:
+           await interaction.response.send_message(content="<a:catnewspaper:1096143115678662656> <a:catnewspaper:1096143115678662656> <a:catnewspaper:1096143115678662656>", ephemeral=True)
+    @app_commands.command(name="unmute", description="Hebe das Timeout von einem User auf")
+    @commands.cooldown(1, 15, commands.BucketType.user)
+    async def unmute(self, interaction, member: discord.Member, reason: str):
+        channel = interaction.guild.get_channel(1063958279409115136)
+        if interaction.user.guild_permissions.administrator:
+            duration = None
+            await interaction.response.send_message(content="Du hast das Timeout  von " + member.mention + " aufgehoben", ephemeral=True)
+            await member.timeout(duration, reason=reason)
+
+            embed = discord.Embed(title="User aus dem Timeout", description=interaction.user.mention + " hat ein Timeout von " + member.mention + " aufgehoben",color=0x0094ff, timestamp=datetime.datetime.now())
+            embed.add_field(name="Aus dem Timeout:", value=member.mention, inline=True)
+            embed.add_field(name="Von:", value=interaction.user.mention, inline=True)
+            embed.add_field(name="Grund:", value=reason, inline=True)
+            await channel.send(embed=embed)
+        else:
+           await interaction.response.send_message(content="<a:catnewspaper:1096143115678662656> <a:catnewspaper:1096143115678662656> <a:catnewspaper:1096143115678662656>", ephemeral=True)
 
 
     @app_commands.command(name="embed-builder", description="Baue ein Embed in einem Formular!")
