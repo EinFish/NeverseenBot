@@ -12,14 +12,11 @@ from discord.permissions import Permissions
 from discord.utils import MISSING
 
 
-
-
-
 class Birthdays(discord.app_commands.Group):
 
 
-    def __init__(self, *, name: str | locale_str = ..., description: str | locale_str = ..., parent: Group | None = None, guild_ids: List[int] | None = None, guild_only: bool = ..., nsfw: bool = ..., auto_locale_strings: bool = True, default_permissions: Permissions | None = ..., extras: Dict[Any, Any] = ...):
-        super().__init__(name=name, description=description, parent=parent, guild_ids=guild_ids, guild_only=guild_only, nsfw=nsfw, auto_locale_strings=auto_locale_strings, default_permissions=default_permissions, extras=extras)
+    def __init__(self):
+        super().__init__()
 # Lade bereits gespeicherte Geburtstage aus einer JSON-Datei
 try:
     with open('birthdays.json', 'r') as file:
