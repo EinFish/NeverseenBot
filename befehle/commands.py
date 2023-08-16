@@ -167,7 +167,7 @@ class ModCommands(discord.app_commands.Group):
             await interaction.response.send_message(content="<a:catnewspaper:1096143115678662656> <a:catnewspaper:1096143115678662656> <a:catnewspaper:1096143115678662656>", ephemeral=True)
 
 
-    @app_commands.command(name="mute", description="Schicke einen Member ins TImeout")
+    @app_commands.command(name="mute", description="Schicke einen Member in den Timeout")
     @commands.cooldown(1, 15, commands.BucketType.user)
     async def on_member_timeout(self, interaction, member: discord.Member, reason: str, seconds: int = 1, minutes: int = 0, hours: int = 0, days: int = 0, ):
         channel = interaction.guild.get_channel(1063958279409115136)
@@ -176,7 +176,7 @@ class ModCommands(discord.app_commands.Group):
             await interaction.response.send_message(content="Der User " + member.mention + f" wurde in ein Timeout geschickt für: {duration}", ephemeral=True)
             await member.timeout(duration, reason=reason)
 
-            embed = discord.Embed(title="User im Timeout", description="Ein User wurde von " + interaction.user.mention + " ins Timeout versetzt.",color=0x0094ff, timestamp=datetime.datetime.now())
+            embed = discord.Embed(title="User im Timeout", description=f"Ein User wurde von {interaction.user.mention} ins Timeout versetzt.", color=0x0094ff, timestamp=datetime.datetime.now())
             embed.add_field(name="Im Timeout:", value=member.mention, inline=True)
             embed.add_field(name="Von:", value=interaction.user.mention, inline=True)
             embed.add_field(name="Für:", value=duration, inline=True)
