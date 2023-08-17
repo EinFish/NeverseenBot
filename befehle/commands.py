@@ -1,12 +1,10 @@
 import asyncio
-from typing import Any, Optional, Union
+from typing import Any
 import discord
-from discord.emoji import Emoji
-from discord.enums import ButtonStyle
-from discord.ext import commands, tasks
+from discord.ext import commands
 from discord import app_commands
 import datetime
-import json
+
 
 
 class TicketButtons(discord.ui.Button):
@@ -256,10 +254,7 @@ class HelpSelect(discord.ui.Select):
                         value=cmd.parent.qualified_name
                     ))
         return options
-    
-
-
-    
+  
 
 
 class Commands(commands.Cog):
