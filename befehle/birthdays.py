@@ -26,53 +26,42 @@ class BirthdayCommands(discord.app_commands.Group):
         with open("serverconfig.json") as file:
             bjson = json.load(file)
             bjson[str(guildid)] = {"name": guildname, "bday": channelid}
-
-            print(bjson)
-
             with open("serverconfig.json", 'w') as json_file:
                 json.dump(bjson, json_file, indent=4)
 
-            await interaction.followup.send(f"Birthday Channel gesetzt zu {birthdaychannel}")
+            await interaction.followup.send(f"Birthday Channel gesetzt auf {birthdaychannel.mention}")
 
     @app_commands.command(name="add", description="Füge deinen Geburtstag ins Geburtstagssystem ein")
     @commands.cooldown(1, 20, commands.BucketType.user)
-    async def badd(self, interaction, tag: int, monat: int, jahr: int = None):
+    async def badd(self, interaction, tag: int, monat: int, jahr: int = 1600):
         userid = interaction.user.id
         with open("birthdays.json") as file:
             bjson = json.load(file)
-            date_format = "%d/%m/%Y"
-            date_format2 = "%d/%m"
             if not jahr == None:
-                today = datetime.datetime.now()
-                bday = datetime.datetime.strptime(
-                    f"{monat}/{tag}/{jahr}", date_format)
-                diff = bday - today
-                diff.days
-                print(bday)
-                ts = datetime.datetime.timestamp(bday)
-                print(type(bday))
-                print(diff)
-                bjson[str(userid)] = {"bday": ts}
-                print(bjson)
+                today = datetime.date.today()
+                date = datetime.date(jahr, monat, tag)
+                print(date)
+                print(today)
+                bday = date.strftime("%d/%m/%Y")
+                bjson[str(userid)] = {"bday": bday}
             else:
-                today = datetime.datetime.now()
-                bday = datetime.datetime.strptime(
-                    f"{monat}/{tag}", date_format2)
-                diff = bday - today
-                diff.days
-                print(bday)
-                ts = datetime.datetime.timestamp(bday)
-                print(type(bday))
-                print(diff)
-                bjson[str(userid)] = {"bday": ts}
-                print(bjson)
+                today = datetime.date.today()
+                date = datetime.date(jahr, monat, tag)
+                print(date)
+                print(today)
+                bday = date.strftime("%d/%m/Y")
+                bjson[str(userid)] = {"bday": bday}
 
-                with open("serverconfig.json", 'w') as json_file:
-                    json.dump(bjson, json_file, indent=4)
+            with open("birthdays.json", 'w') as json_file:
+                json.dump(bjson, json_file, indent=4)
 
     @app_commands.command(name="show", description="Zeigt den Geburtstag von einem Member")
     @commands.cooldown(1, 20, commands.BucketType.user)
-    async def bshow(self, member: discord.Member):
+    async def bshow(self, interaction):
+        userid = interaction.user.id
+        with open("birthdays.json") as file:
+            bjson = json.load(file)
+            print(bjson[userid])  # userid int to str
         print("dsf")
 
     @app_commands.command(name="delete", description="Löscht den Geburtstag von einem Member")
