@@ -23,3 +23,8 @@ class birthdayinit():
             json.dump(self.birthdays, file, indent=4)
         with open('config.json', 'w') as file:
             json.dump(self.config, file, indent=4)
+
+    def extract_birthdays(json_data):
+        birthdays = []
+
+

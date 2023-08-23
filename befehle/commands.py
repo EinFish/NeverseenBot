@@ -69,7 +69,7 @@ class TicketModal(discord.ui.Modal):
         self.Thread = await Channel.create_thread(name=interaction.user.display_name)
         await interaction.response.send_message(content="Dein Ticket findest du hier: " + self.Thread.jump_url , ephemeral=True)
         embed = discord.Embed(color=0x0094ff, timestamp=datetime.datetime.now(), title=self.problem, description=interaction.user.mention + " bitte beschreibe dein Problem näher. Es wird sich bald ein Team Mitglied um dein Problem kümmern.")
-        await self.Thread.send(content=self.person + "," + mod, embed=embed, view=TicketView2())
+        await self.Thread.send(content=f"{self.person}, {mod}", embed=embed, view=TicketView2())
 
 
 
