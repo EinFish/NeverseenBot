@@ -4,6 +4,9 @@ import asyncio
 import json
 from discord.ext import commands
 
+with open("config.json", "r") as file:
+    config = json.load(file)
+
 bot = commands.Bot("neverseen.", intents=discord.Intents.all(),
                    application_id=config["APP_ID"])
 
@@ -26,7 +29,6 @@ async def on_ready():
     print("Bot ist ready!")
     await bot.change_presence(activity=discord.Streaming(name="omg", url=config["TWITCH_URL"]))
 
-with open("config.json", "r") as file:
-    config = json.load(file)
+
 
 bot.run(config["TOKEN"])

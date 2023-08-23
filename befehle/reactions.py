@@ -1,6 +1,7 @@
 import asyncio
 import discord
 from discord.ext import commands
+import json
 
 with open("reactions.json") as file:
     rjson = json.load(file)
