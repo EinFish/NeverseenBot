@@ -1,4 +1,5 @@
 import discord
+import sys
 import os
 import asyncio
 import json
@@ -28,7 +29,6 @@ if __name__ == "__main__":
 async def on_ready():
     print("Bot ist ready!")
     await bot.change_presence(activity=discord.Streaming(name="omg", url=config["TWITCH_URL"]))
-
 
 
 bot.run(config["TOKEN"])
