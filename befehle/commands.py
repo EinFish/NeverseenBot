@@ -5,7 +5,12 @@ from discord.ext import commands
 from discord import app_commands
 import datetime
 
-
+with open("serverconfig.json") as file:
+    sjson = json.load(file)
+with open("reactions.json") as file:
+    rjson = json.load(file)
+with open("config.json", "r") as file:
+    config = json.load(file)
 
 class TicketButtons(discord.ui.Button):
     def __init__(self, text, discordbuttonstyle, mode):
@@ -55,7 +60,7 @@ class TicketModal(discord.ui.Modal):
         super().__init__(title="Problembeschreibung:")
     problem = discord.ui.TextInput(label="Was ist dein Anliegen?", placeholder="Problem", required=True, style=discord.TextStyle.short, max_length=100, min_length=10)
     async def on_submit(self, interaction) -> None:
-        mod = "<@&1063569606658248746>"
+        mod = sjson["mod"]
         Channel = interaction.channel
         self.person = interaction.user.mention
         id = interaction.user.id
@@ -87,7 +92,7 @@ class FunCommands(discord.app_commands.Group):
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def twich(self, ctx):
         await ctx.response.defer()
-        embed = discord.Embed(title="Twitch Link", description=f"https://www.twitch.tv/neverseen_minecraft", color=0x0094ff, timestamp=datetime.datetime.now())
+        embed = discord.Embed(title="Twitch Link", description=sjson["twitch_link"], color=0x0094ff, timestamp=datetime.datetime.now())
         await ctx.followup.send(embed=embed)
 
     @app_commands.command(name="play-music", description="Spielt einen ausgewählten Song.")
@@ -120,7 +125,7 @@ class ModCommands(discord.app_commands.Group):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def kick(self, interaction, member: discord.Member, reason: str):
         if interaction.user.guild_permissions.administrator:
-            channel = interaction.guild.get_channel(1063958279409115136)
+            channel = interaction.guild.get_channel(int(sjson["log_channel"]))
             await member.kick(reason=reason)
             await interaction.response.send_message(content=f"Du hast {member.mention} erfolgreich gekickt", ephemeral=True)
 
@@ -136,7 +141,7 @@ class ModCommands(discord.app_commands.Group):
     @app_commands.command(name="ban", description="Banne einen Member")
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def on_member_ban(self, interaction, user: discord.Member, reason: str):
-     channel = interaction.guild.get_channel(1063958279409115136)
+     channel = interaction.guild.get_channel(int(sjson["log_channel"]))
      if interaction.user.guild_permissions.administrator:
         await interaction.response.send_message(content=f"Du hast {user.mention} erfolgreich gebannt", ephemeral=True)
         await user.ban(reason=reason)
@@ -153,7 +158,7 @@ class ModCommands(discord.app_commands.Group):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def unban(self, interaction, user: discord.User, reason: str):
         if interaction.user.guild_permissions.administrator:
-            channel = interaction.guild.get_channel(1063958279409115136)
+            channel = interaction.guild.get_channel(int(sjson["log_channel"]))
             await interaction.guild.unban(user, reason=reason)
             await interaction.response.send_message(content=f"Du hast {user.mention} erfolgreich entbannt", ephemeral=True)
 
@@ -162,13 +167,13 @@ class ModCommands(discord.app_commands.Group):
             embed.add_field(name="Von:", value=interaction.user.mention, inline=True)
             await channel.send(embed=embed)
         else:
-            await interaction.response.send_message(content="<a:catnewspaper:1096143115678662656> <a:catnewspaper:1096143115678662656> <a:catnewspaper:1096143115678662656>", ephemeral=True)
+            await interaction.response.send_message(content=f"{rjson["catnewspaper"]} {rjson["catnewspaper"]} {rjson["catnewspaper"]}", ephemeral=True)
 
 
     @app_commands.command(name="mute", description="Schicke einen Member in den Timeout")
     @commands.cooldown(1, 15, commands.BucketType.user)
     async def on_member_timeout(self, interaction, member: discord.Member, reason: str, seconds: int = 1, minutes: int = 0, hours: int = 0, days: int = 0, ):
-        channel = interaction.guild.get_channel(1063958279409115136)
+        channel = interaction.guild.get_channel(int(sjson["log_channel"]))
         if interaction.user.guild_permissions.administrator:
             duration = datetime.timedelta(seconds=seconds, minutes=minutes, hours= hours, days=days)
             await interaction.response.send_message(content="Der User " + member.mention + f" wurde in ein Timeout geschickt für: {duration}", ephemeral=True)
@@ -181,11 +186,11 @@ class ModCommands(discord.app_commands.Group):
             embed.add_field(name="Grund:", value=reason, inline=True)
             await channel.send(embed=embed)
         else:
-           await interaction.response.send_message(content="<a:catnewspaper:1096143115678662656> <a:catnewspaper:1096143115678662656> <a:catnewspaper:1096143115678662656>", ephemeral=True)
+           await interaction.response.send_message(content=f"{rjson["catnewspaper"]} {rjson["catnewspaper"]} {rjson["catnewspaper"]}", ephemeral=True)
     @app_commands.command(name="unmute", description="Hebe das Timeout von einem User auf")
     @commands.cooldown(1, 15, commands.BucketType.user)
     async def unmute(self, interaction, member: discord.Member, reason: str):
-        channel = interaction.guild.get_channel(1063958279409115136)
+        channel = interaction.guild.get_channel(int(sjson["log_channel"]))
         if interaction.user.guild_permissions.administrator:
             duration = None
             await interaction.response.send_message(content="Du hast das Timeout  von " + member.mention + " aufgehoben", ephemeral=True)
@@ -197,7 +202,7 @@ class ModCommands(discord.app_commands.Group):
             embed.add_field(name="Grund:", value=reason, inline=True)
             await channel.send(embed=embed)
         else:
-           await interaction.response.send_message(content="<a:catnewspaper:1096143115678662656> <a:catnewspaper:1096143115678662656> <a:catnewspaper:1096143115678662656>", ephemeral=True)
+           await interaction.response.send_message(content=f"{rjson["catnewspaper"]} {rjson["catnewspaper"]} {rjson["catnewspaper"]}", ephemeral=True)
 
 
     @app_commands.command(name="embed-builder", description="Baue ein Embed in einem Formular!")
@@ -290,7 +295,7 @@ class Commands(commands.Cog):
 
     @commands.command()
     async def sync(self, ctx) -> None:
-        if ctx.author.id != 753863284448428102:
+        if ctx.author.id != config["OWNER_ID"]:
             await ctx.send("Das solltest du besser lassen :)")
             return
         print("started sync")

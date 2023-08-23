@@ -3,6 +3,9 @@ import datetime
 import discord
 from discord.ext import commands
 
+with open("serverconfig.json") as file:
+    sjson = json.load(file)
+
 class Automod(commands.Cog):
     banned_words = ["hs", "Hurensohn", "töst"]
 
@@ -16,7 +19,7 @@ class Automod(commands.Cog):
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         if not before.author.bot:
-            channel = after.guild.get_channel(1063958279409115136)
+            channel = after.guild.get_channel(int(sjson["log_channel"]))
             embed = discord.Embed(title="Nachricht bearbeitet", description="eine nachricht von " + before.author.name + " wurde bearbeitet.", color=0x0094ff, timestamp=datetime.datetime.now())
             embed.add_field(name="Vorher:", value=before.content, inline=True)
             embed.add_field(name="Nachher:", value=after.content, inline=True)
@@ -29,7 +32,7 @@ class Automod(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
-        channel = message.guild.get_channel(1063958279409115136)
+        channel = message.guild.get_channel(int(sjson["log_channel"]))
         embed = discord.Embed(title="Nachricht gelöscht", description="eine nachricht von " + message.author.name + " wurde von " + message + "", color=0x0094ff, timestamp=datetime.datetime.now())
         embed.add_field(name="Nachricht:", value=message.content, inline=True)
         embed.add_field(name="Channel:", value=message.channel.jump_url, inline=True)
