@@ -5,7 +5,7 @@ import json
 from discord.ext import commands
 
 bot = commands.Bot("neverseen.", intents=discord.Intents.all(),
-                   application_id="1135990698517221376")
+                   application_id=config["APP_ID"])
 
 
 if __name__ == "__main__":
@@ -24,7 +24,7 @@ if __name__ == "__main__":
 @bot.event
 async def on_ready():
     print("Bot ist ready!")
-    await bot.change_presence(activity=discord.Streaming(name="omg", url="https://www.twitch.tv/lefish9873"))
+    await bot.change_presence(activity=discord.Streaming(name="omg", url=config["TWITCH_URL"]))
 
 with open("config.json", "r") as file:
     config = json.load(file)

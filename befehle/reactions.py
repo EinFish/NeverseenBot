@@ -2,6 +2,9 @@ import asyncio
 import discord
 from discord.ext import commands
 
+with open("reactions.json") as file:
+    rjson = json.load(file)
+
 class Reactions(commands.Cog):
 
     def __init__(self, bot):
@@ -18,7 +21,7 @@ class Reactions(commands.Cog):
                 await message.reply(content="test bestanden")
 
             if "xd" in message.content.lower():
-               await message.add_reaction("<:youtube:1096445742069055619>")
+               await message.add_reaction(rjson["youtube"])
 
 
 

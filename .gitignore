@@ -1,5 +1,11 @@
-config.json
+# IDE
 .idea
 .vscode
+
+# Python
 **/__pycache__
 venv
+
+# Data
+#*.json
+#.env
