@@ -34,6 +34,7 @@ class BirthdayCommands(discord.app_commands.Group):
     @app_commands.command(name="add", description="Füge deinen Geburtstag ins Geburtstagssystem ein")
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def badd(self, interaction, tag: int, monat: int, jahr: int = 1600):
+        await interaction.response.defer()
         userid = interaction.user.id
         with open("birthdays.json") as file:
             bjson = json.load(file)
@@ -47,6 +48,7 @@ class BirthdayCommands(discord.app_commands.Group):
             else:
                 today = datetime.date.today()
                 date = datetime.date(jahr, monat, tag)
+                date2 = date.split("-")
                 print(date)
                 print(today)
                 bday = date.strftime("%d/%m/Y")
@@ -55,14 +57,54 @@ class BirthdayCommands(discord.app_commands.Group):
             with open("birthdays.json", 'w') as json_file:
                 json.dump(bjson, json_file, indent=4)
 
+        if jahr == 1600:
+            embed = discord.Embed(title="Geburtstag eingetragen!", description=f"Dein geburtstag wurde erfolgreich auf den `{tag}.{monat}.` gesetzt.", timestamp=datetime.datetime.now(), color=0x0094ff)
+        else:
+            embed = discord.Embed(title="Geburtstag eingetragen!", description=f"Dein geburtstag wurde erfolgreich auf den `{tag}.{monat}.{jahr}` gesetzt.", timestamp=datetime.datetime.now(), color=0x0094ff)
+
+        await interaction.followup.send(embed=embed)
+
+
     @app_commands.command(name="show", description="Zeigt den Geburtstag von einem Member")
     @commands.cooldown(1, 20, commands.BucketType.user)
-    async def bshow(self, interaction):
-        userid = interaction.user.id
+    async def bshow(self, interaction, member: discord.Member = None):
+        await interaction.response.defer()
+        id = interaction.user.id
+        if member == None:
+            userid = str(id)
+            user1 = interaction.user
+        else:
+            userid = str(member.id)
+            user1 = member
         with open("birthdays.json") as file:
             bjson = json.load(file)
-            print(bjson[userid])  # userid int to str
-        print("dsf")
+
+
+        bdaystr = bjson[userid]['bday']
+        bdaylist = bdaystr.split("/")
+        print(bdaylist[0])
+
+        # checking the user and birthday, to display the data.
+        if member != None:
+            if bdaylist[2] == "1600":
+                embed = discord.Embed(title=f"Geburtstag von {user1.display_name}", description=f"Der User {user1.mention} hat am `{bdaylist[0]}.{bdaylist[1]}` geburtstag.", timestamp=datetime.datetime.now(), color=0x0094ff)
+                await interaction.followup.send(embed=embed)
+            else:
+                embed = discord.Embed(title=f"Geburtstag von {user1.display_name}", description=f"Der User {user1.mention} hat am `{bdaylist[0]}.{bdaylist[1]}` geburtstag und ist im Jahr `{bdaylist[2]}` geboren.", timestamp=datetime.datetime.now(), color=0x0094ff)
+                await interaction.followup.send(embed=embed)
+
+        else:
+            if bdaylist[2] == "1600":
+                embed = discord.Embed(title=f"Geburtstag von {user1}", description=f"Du hast am `{bdaylist[0]}.{bdaylist[1]}` geburtstag ", timestamp=datetime.datetime.now(), color=0x0094ff)
+                await interaction.followup.send(embed=embed)
+            else:
+                embed = discord.Embed(title=f"Geburtstag von {user1.display_name}", description=f"Du hast am `{bdaylist[0]}.{bdaylist[1]}` geburtstag und bist im Jahr `{bdaylist[2]}` geboren.", timestamp=datetime.datetime.now(), color=0x0094ff)
+                await interaction.followup.send(embed=embed)
+
+
+        
+
+        
 
     @app_commands.command(name="delete", description="Löscht den Geburtstag von einem Member")
     @commands.cooldown(1, 20, commands.BucketType.user)

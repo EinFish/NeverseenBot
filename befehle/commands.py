@@ -299,19 +299,5 @@ class Commands(commands.Cog):
                 text=f"{ctx.user}", icon_url=ctx.user.avatar.url if ctx.user.avatar != None else None)
             await ctx.followup.send(embed=embed)
 
-
-    @commands.command()
-    async def sync(self, ctx) -> None:
-        if ctx.author.id != config["OWNER_ID"]:
-            await ctx.send("Das solltest du besser lassen :)")
-            return
-        print("started sync")
-        fmt = await ctx.bot.tree.sync()
-        await ctx.bot.tree.sync()
-        await ctx.send(f"{len(fmt)} Befehle wurden gesynced.")
-        print("finished sync")
-
-
-
 async def setup(bot):
     await bot.add_cog(Commands(bot))
