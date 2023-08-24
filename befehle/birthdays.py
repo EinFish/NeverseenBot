@@ -3,6 +3,7 @@ import json
 from typing import Any, Dict, List, Optional, Union
 import discord
 import datetime
+
 from discord.app_commands.commands import Group
 from discord.app_commands.translator import locale_str
 from discord.ext import commands
@@ -10,6 +11,7 @@ from discord import app_commands
 from discord.permissions import Permissions
 from discord.utils import MISSING
 import utils
+import time
 
 birthdayjson = utils.birthdayinit()
 
@@ -47,7 +49,7 @@ class BirthdayCommands(discord.app_commands.Group):
 
     @app_commands.command(name="add", description="Füge deinen Geburtstag ins Geburtstagssystem ein")
     @commands.cooldown(1, 20, commands.BucketType.user)
-    async def badd(self, interaction, tag: app_commands.Range[int, 1, 28], monat: app_commands.Range[int, 1, 12], jahr: app_commands.Range[int, 1960, 2020] = 1600):
+    async def badd(self, interaction, tag: app_commands.Range[int, 1, 31], monat: app_commands.Range[int, 1, 12], jahr: app_commands.Range[int, 1960, 2020] = 1600):
         await interaction.response.defer()
         userid = interaction.user.id
         
@@ -149,35 +151,105 @@ class BirthdayCommands(discord.app_commands.Group):
             json.dump(bjson, json_file, indent=4)
 
 
-        
 
-
-        
 
     @app_commands.command(name="next", description="Zeigt die nächsten Geburtstage an")
     @commands.cooldown(1, 20, commands.BucketType.user)
-    async def bnext(self, interaction):
-        bdlist = []
-        birthdays = []
-        with open("birthdays.json") as file:
-            bdlist = json.load(file)
-        await interaction.response.defer()
-        print(bdlist)
-        
-        try:
-            
-            for user_id, user_data in bdlist.items():
-                birthdays.append((user_id, user_data['bday']))
-        except Exception as e:
-            print("Fehler beim Verarbeiten der Daten:", e)
-    
-        birthdays = bdlist
-        for user_id, bday in birthdays:
-            print("User ID:", user_id)
-            print("Geburtstag:", bday)
-            print()
+    async def birthday(self, ctx):
+        await ctx.response.defer()
+        def divideListInChunks(list, chunkSize):
+            for i in range(0, len(list), chunkSize): 
+                yield list[i:i + chunkSize]
 
-        embed = discord.Embed()
+        memberlist = [member.id for member in ctx.guild.members] # mit 'members = [member.id for member in ctx.guild.members]' austauschen
+
+        jsonData = bjson # Daten aus JSON laden
+
+        users = list(jsonData) # Ein Array mit UserIDs aus der JSON machen
+
+        maxBDaysPerPage = 10 # Die Maximalen Geburtstage die pro Seite angezeigt werden sollen
+
+        currentPage = 0 # Die Aktuelle Seite
+
+        daytoday = datetime.datetime.now().strftime("%d") # Heutiger Tag
+        monthtoday = datetime.datetime.now().strftime("%m") # Heutiger Monat
+        yeartoday = datetime.datetime.now().strftime("%Y") # Heutiges Jahr
+
+        parsedBirthdays = [] # Geburtstage als ein bestimmtes Format 
+
+        for user in users:
+            if int(user) in memberlist: #ids sind strings, deshalb in int umwandeln
+                mention = f"<@{user}>"
+                birthday = jsonData[user]["bday"]
+                print(birthday)
+                day = birthday.split("/")[0]
+                month = birthday.split("/")[1]
+                rawYear = birthday.split("/")[2]
+                if int(month) > int(monthtoday): # Monat war noch nicht -> Geburtstag war noch nicht
+                    year = int(yeartoday)
+                elif int(month) == int(monthtoday) and int(day) >= int(daytoday): # Monat ist heute aber Tag war noch nicht -> Geburtstag war noch nicht
+                    year = int(yeartoday)
+                else: # Geburtstag war schon
+                    year = int(yeartoday) + 1
+                
+                date_obj = datetime.datetime.strptime(f"{month}-{day}-{year}", "%m-%d-%Y")
+
+                birthdayParsed = {}
+                birthdayParsed["inDays"] = (date_obj - datetime.datetime.now()).days
+                birthdayParsed["showAge"] = rawYear != "1600"
+                birthdayParsed["newAge"] = year - int(rawYear)
+                birthdayParsed["user"] = user
+                birthdayParsed["timestamp"] = int(time.time()) + birthdayParsed["inDays"] * 86400 +86400 # Für discord time formating
+                parsedBirthdays.append(birthdayParsed)
+
+        sortedBirthdays = sorted(parsedBirthdays, key=lambda x: x['inDays'])
+
+        chunkedBirthdays = [_ for _ in divideListInChunks(sortedBirthdays, maxBDaysPerPage)]
+
+        print(chunkedBirthdays)
+
+        def generatePageContent():
+            text = ""
+            for birthday in chunkedBirthdays[currentPage]:
+                if birthday['showAge']:
+                    text += f"<@{birthday['user']}> ({birthday['newAge']}. Geburtstag) - <t:{birthday['timestamp']}:D> <t:{birthday['timestamp']}:R>\n"
+                else:
+                    text += f"<@{birthday['user']}> - <t:{birthday['timestamp']}:D> <t:{birthday['timestamp']}:R>\n"
+            return text
+
+        async def nextPage(interaction):
+            nonlocal currentPage
+            currentPage += 1
+            if currentPage == len(chunkedBirthdays):
+                currentPage = 0
+            await updateEmbed(interaction)
+
+        async def beforePage(interaction):
+            nonlocal currentPage
+            currentPage -= 1
+            if currentPage == -1:
+                currentPage = len(chunkedBirthdays) - 1
+            await updateEmbed(interaction)
+
+        def getEmbed():
+            embed = discord.Embed(title = "Die nächsten Geburtstage", description = generatePageContent(), color=0x0094ff, timestamp=datetime.datetime.now())
+            return embed
+
+        async def updateEmbed(interaction):
+            embed = getEmbed()
+            await interaction.response.edit_message(embed = embed)
+
+        embed = getEmbed()
+        view = discord.ui.View()
+        if len(chunkedBirthdays) > 1:
+            prevpagebtn = discord.ui.Button(label = "⏪")
+            prevpagebtn.callback = beforePage
+            nextpagebtn = discord.ui.Button(label = "⏩")
+            nextpagebtn.callback = nextPage
+            view.add_item(prevpagebtn)
+            view.add_item(nextpagebtn)
+
+        await ctx.followup.send(embed = embed, view = view)
 
 
 class BirthdayCog(commands.Cog):
