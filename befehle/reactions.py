@@ -6,6 +6,7 @@ import json
 with open("reactions.json") as file:
     rjson = json.load(file)
 
+
 class Reactions(commands.Cog):
 
     def __init__(self, bot):
@@ -22,8 +23,7 @@ class Reactions(commands.Cog):
                 await message.reply(content="test bestanden")
 
             if "xd" in message.content.lower():
-               await message.add_reaction(rjson["youtube"])
-
+                await message.add_reaction(rjson["youtube"])
 
 
 async def setup(bot):

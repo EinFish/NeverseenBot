@@ -24,21 +24,27 @@ class AdminCommands(discord.app_commands.Group):
             guildname = interaction.guild.name
             birthdayrole2 = ""
             modrole2 = modrole.mention
-            if birthdayrole != None: birthdayrole2 = birthdayrole.mention
-            if welcomechannel == None: welcomechannel = "None"
-            print(modrole2)
+            if birthdayrole != None:
+                birthdayrole2 = birthdayrole.id
+            if welcomechannel == None:
+                welcomechannel = "None"
             sjson[str(guildid)] = {"name": guildname, "modrole": modrole2}
-            if logchannel != None: sjson[str(guildid)]["bday"] = birthdaychannel.id
-            if logchannel != None: sjson[str(guildid)]["logchannel"] = logchannel.id
-            if welcomechannel != "None": sjson[str(guildid)]["welcome"] = welcomechannel.id
-            else: sjson[str(guildid)]["welcome"] = welcomechannel
-            if birthdayrole2 != "": sjson[str(guildid)]["bdayrole"] = birthdayrole2
+            if birthdaychannel != None:
+                sjson[str(guildid)]["bday"] = birthdaychannel.id
+            if logchannel != None:
+                sjson[str(guildid)]["logchannel"] = logchannel.id
+            if welcomechannel != "None":
+                sjson[str(guildid)]["welcome"] = welcomechannel.id
+            else:
+                sjson[str(guildid)]["welcome"] = welcomechannel
+            if birthdayrole2 != "":
+                sjson[str(guildid)]["bdayrole"] = birthdayrole2
             with open("serverconfig.json", "w") as json_file:
                 json.dump(sjson, json_file, indent=4)
 
-            print("sdj")
+            await interaction.followup.send(content="👌")
         else:
-            interaction.followup.send(content=f"{rjson['catnewspaper']}", ephemeral=True)
+            await interaction.followup.send(content=f"{rjson['catnewspaper']}", ephemeral=True)
 
     @app_commands.command(name="welcome-embed", description="Legt die willkommensnachricht fest.")
     @commands.cooldown(1, 30, commands.BucketType.guild)
@@ -49,16 +55,31 @@ class AdminCommands(discord.app_commands.Group):
             if sjson[str(guildid)]["welcome"] != "None":
                 print("dfj")
 
-
             else:
                 await interaction.followup.send(content="Bitte lege erst den welcome channel fest mit `/admin setup`", ephemeral=True)
                 print("dfj")
             print("dfj")
 
         else:
-            interaction.followup.send(
-                content=f"{rjson['catnewspaper']}", ephemeral=True
-            )
+            await interaction.followup.send(
+                content=f"{rjson['catnewspaper']}", ephemeral=True)
+
+    @app_commands.command(name="bewerben-phase", description="öffne oder schließe die phase zum bewerben")
+    @commands.cooldown(1, 10, commands.BucketType.user,)
+    async def bwp(self, interaction, phase: bool):
+        await interaction.response.defer()
+        guildid = interaction.guild.id
+        if interaction.user.guild_permissions.administrator:
+            sjson[str(guildid)] = {"bwp": phase}
+            print("dfj")
+        else:
+            await interaction.followup.send(content="Du hast keine Berechtigungen dafür.", ephemeral=True)
+        print("dfj")
+
+    async def on_guild_remove(ctx):
+        guildid = ctx.guild.id
+        del sjson[str(guildid)]
+        print("dfj")
 
 
 class AdminCog(commands.Cog):
@@ -67,7 +88,8 @@ class AdminCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        admincmds = AdminCommands(name="admin", description="Befehle für admins")
+        admincmds = AdminCommands(
+            name="admin", description="Befehle für admins")
         self.bot.tree.add_command(admincmds)
         print("AdminCommands Geladen!")
 
