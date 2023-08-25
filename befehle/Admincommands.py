@@ -17,7 +17,7 @@ with open("reactions.json") as file:
 class AdminCommands(discord.app_commands.Group):
     @app_commands.command(name="setup", description="Passe die Einstellungen des Bots an deinen Server an")
     @commands.cooldown(1, 30, commands.BucketType.guild)
-    async def setupserver(self, interaction, modrole: discord.Role, logchannel: discord.TextChannel = None, birthdaychannel: discord.TextChannel = None, welcomechannel: discord.TextChannel = None, birthdayrole: discord.Role = None):
+    async def setupserver(self, interaction, modrole: discord.Role, logchannel: discord.TextChannel = None, birthdaychannel: discord.TextChannel = None, welcomechannel: discord.TextChannel = None, birthdayrole: discord.Role = None, bewerbungschannel: discord.TextChannel = None):
         await interaction.response.defer()
         if interaction.user.guild_permissions.administrator:
             guildid = interaction.guild.id
@@ -31,6 +31,8 @@ class AdminCommands(discord.app_commands.Group):
             sjson[str(guildid)] = {"name": guildname, "modrole": modrole2}
             if birthdaychannel != None:
                 sjson[str(guildid)]["bday"] = birthdaychannel.id
+            if bewerbungschannel != None:
+                sjson[str(guildid)]["bewerben"] = bewerbungschannel.id
             if logchannel != None:
                 sjson[str(guildid)]["logchannel"] = logchannel.id
             if welcomechannel != "None":

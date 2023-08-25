@@ -288,7 +288,7 @@ class BirthdayCog(commands.Cog):
     async def birthdayloop(self):
         currenttime = datetime.datetime.fromtimestamp(
             int(time.time())).strftime('%H')
-        if currenttime == "22":  # Es ist 3 Uhr morgends
+        if currenttime == "09":  # Es ist 3 Uhr morgends
             try:
                 config = sjson  # config laden
                 for server in config:
