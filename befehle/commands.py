@@ -1,11 +1,16 @@
 import asyncio
-from typing import Any
+from typing import Any, Dict, List, Optional, Union
 import discord
 import json
+from discord.app_commands.commands import Group
+from discord.app_commands.translator import locale_str
 from discord.ext import commands
 from discord import app_commands
 import datetime
 import time
+
+from discord.permissions import Permissions
+from discord.utils import MISSING
 
 with open("serverconfig.json") as file:
     sjson = json.load(file)
@@ -99,6 +104,7 @@ class TicketView(discord.ui.View):
 
 
 class FunCommands(discord.app_commands.Group):
+
     @app_commands.command(name="twitch", description="Bekomme den Twitch Link!")
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def twich(self, ctx):
@@ -111,6 +117,15 @@ class FunCommands(discord.app_commands.Group):
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def playsong(self, interaction):
         await interaction.response.send_message("Nicht eingebaut!", ephemeral=True)
+
+    @app_commands.command(name="lul", description="das ist ein command, falls du es nicht wusstest.")
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def lul(self, interaction, msg: str):
+        embed = discord.Embed(title="lul", color=0x0094ff)
+        embed.add_field(
+            name=f"der user {interaction.user.display_name} hat gesagt:", value=msg)
+
+        await interaction.response.send_message(embed=embed)
 
 
 class ModCommands(discord.app_commands.Group):
@@ -128,7 +143,8 @@ class ModCommands(discord.app_commands.Group):
                 text = "Klicke auf den unteren Knopf um ein " + titel + " ticket zu erstellen."
             await interaction.response.defer()
             print(channel.id)
-            embed = discord.Embed(title=titel, description=text, color=0x0094ff)
+            embed = discord.Embed(
+                title=titel, description=text, color=0x0094ff)
             await interaction.followup.send(content="erstellt", ephemeral=True)
             await channel.send(embed=embed, view=TicketView())
         else:
@@ -149,20 +165,18 @@ class ModCommands(discord.app_commands.Group):
             created3 = int(created2)
             print(type(created2), created2)
 
-            embed = discord.Embed(title=f"Informationen über {member.display_name}", timestamp=datetime.datetime.now(), color=0x0094ff)
+            embed = discord.Embed(
+                title=f"Informationen über {member.display_name}", timestamp=datetime.datetime.now(), color=0x0094ff)
             embed.add_field(name="ID:", value=id)
             embed.add_field(name="Created:", value=f"<t:{str(created3)}:D>")
             embed.add_field(name="Joined:", value=f"<t:{joined3}:R>")
-            embed.image(member.avatar)
+            # embed.image(member.avatar)
 
-            await interaction.response.send_message(embed=embed, ephemeral=True) # View (Buttons) hinzufügen 
-
+            # View (Buttons) hinzufügen
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
         else:
             await interaction.response.send_message(content=f"{rjson['catnewspaper']}", ephemeral=True)
-
-
-
 
     @app_commands.command(name="kick", description="Kicke einen Member")
     @commands.cooldown(1, 10, commands.BucketType.user)

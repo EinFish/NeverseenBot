@@ -53,8 +53,6 @@ class BirthdayCommands(discord.app_commands.Group):
             date = datetime.date(jahr, monat, tag)
             date2 = str(date)
             daten = date2.split("-")
-            print(date)
-            print(today)
             bday = date.strftime("%d/%m/%Y")
             bjson[str(userid)] = {"bday": bday}
 
@@ -63,8 +61,6 @@ class BirthdayCommands(discord.app_commands.Group):
             date = datetime.date(jahr, monat, tag)
             date2 = str(date)
             daten = date2.split("-")
-            print(date)
-            print(today)
             bday = date.strftime("%d/%m/Y")
             bjson[str(userid)] = {"bday": bday}
 
@@ -93,12 +89,11 @@ class BirthdayCommands(discord.app_commands.Group):
             else:
                 userid = str(member.id)
                 user1 = member
-            with open("birthdays.json") as file:
-                bjson = json.load(file)
+            """ with open("birthdays.json") as file:
+                bjson = json.load(file) """
 
             bdaystr = bjson[userid]['bday']
             bdaylist = bdaystr.split("/")
-            print(bdaylist[0])
 
             # checking the user and birthday, to display the data.
             if member != None:

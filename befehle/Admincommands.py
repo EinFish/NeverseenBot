@@ -104,7 +104,6 @@ class AdminCog(commands.Cog):
             return
         print("started sync")
         fmt = await ctx.bot.tree.sync()
-        await ctx.bot.tree.sync()
         await ctx.send(f"{len(fmt)} Befehle wurden gesynced.")
         print("finished sync")
 
