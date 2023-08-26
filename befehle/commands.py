@@ -120,12 +120,14 @@ class FunCommands(discord.app_commands.Group):
 
     @app_commands.command(name="lul", description="das ist ein command, falls du es nicht wusstest.")
     @commands.cooldown(1, 60, commands.BucketType.user)
-    async def lul(self, interaction, msg: str):
+    async def lul(self, ctx, msg: str):
         embed = discord.Embed(title="lul", color=0x0094ff)
         embed.add_field(
-            name=f"der user {interaction.user.display_name} hat gesagt:", value=msg)
+            name=f"der user {ctx.user.display_name} hat gesagt:", value=msg)
+        embed.add_field(
+            name="Ping:", value=f"`{int(ctx.client.latency * 100)}` ms")
 
-        await interaction.response.send_message(embed=embed)
+        await ctx.response.send_message(embed=embed)
 
 
 class ModCommands(discord.app_commands.Group):

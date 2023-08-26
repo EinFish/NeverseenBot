@@ -68,7 +68,7 @@ class AdminCommands(discord.app_commands.Group):
 
     @app_commands.command(name="bewerben-phase", description="öffne oder schließe die phase zum bewerben")
     @commands.cooldown(1, 10, commands.BucketType.user,)
-    async def bwp(self, interaction, phase: bool):
+    async def bwp(self, interaction, phase: bool, channel: discord.TextChannel):
         await interaction.response.defer()
         guildid = interaction.guild.id
         if interaction.user.guild_permissions.administrator:
