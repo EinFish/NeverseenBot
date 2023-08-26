@@ -60,13 +60,16 @@ class EmbedBuilder(discord.ui.Modal):
         label="Titel:", placeholder="Setzte einen Titel", style=discord.TextStyle.short)
   #  farbe = discord.ui.TextInput(label="Farbe:", placeholder="Bitte einen Hex farbcode ohne #", style=discord.TextStyle.short)
     description = discord.ui.TextInput(label="Beschreibung", placeholder="Füge eine Beschreibung hinzu",
-                                       style=discord.TextStyle.long, max_length=1500, required=False)
+                                       style=discord.TextStyle.long, max_length=1500, required=True)
 
     async def on_submit(self, interaction) -> None:
+        des = EmbedBuilder.description
+        title = EmbedBuilder.titel
         embed = discord.Embed(
-            title=EmbedBuilder.titel, color=0x0094ff, description=EmbedBuilder.description)
-        await interaction.response.defer()
-        await interaction.followup.send(embed=embed)
+            title=title, description=des, color=0x0094ff)
+        channel = interaction.channel
+        await channel.send(embed=embed)
+       # await interaction.response.send_message(embed=embed)
 
 
 class TicketModal(discord.ui.Modal):
