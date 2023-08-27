@@ -39,7 +39,7 @@ class Automod(commands.Cog):
     async def on_message_delete(self, message):
         guildid = message.guild.id
         channel = message.guild.get_channel(
-            int(sjson[str(guildid)]["logchannel"]))
+            int(sjson[str(guildid)]["log"]))
         embed = discord.Embed(title="Nachricht gelöscht", description="eine nachricht von " + message.author.name +
                               " wurde von " + message + "", color=0x0094ff, timestamp=datetime.datetime.now())
         embed.add_field(name="Nachricht:", value=message.content, inline=True)

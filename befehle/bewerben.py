@@ -38,22 +38,15 @@ class BewerbenCog(commands.Cog):
         print("Bewerbung geladen!")
 
     @commands.command()
-    async def bewerben(self, ctx):
+    async def bewerben(self, ctx, message: int):
         if ctx.author.guild_permissions.administrator:
             id = ctx.guild.id
-            channelid = sjson[str(id)]['bewerben']
-            channel = self.bot.get_channel(channelid)
-            text = "Klicke auf den unteren Knopf um dich zu Bewerben."
-            embed = discord.Embed(
-                title="Bewerben", description=text, color=0x0094ff)
-            await ctx.reply(content="erstellt", ephemeral=True)
-          #  await channel.send(embed=embed, view=TicketView())
+            print(message)
+            sjson[str(id)]['bewechannel'] = message
+            with open("serverconfig.json", "w") as file:
+                json.dump(sjson, file, indent=4)
         else:
             await ctx.reply(rjson['catnewspaper'])
-
-    @commands.command()
-    async def channel_bewerben(self, ctx):
-        print("dfj")
 
 
 async def setup(bot):
