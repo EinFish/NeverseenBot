@@ -17,6 +17,7 @@ class Automod(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+
         print("Automod geladen!")
 
     @commands.Cog.listener()
@@ -24,7 +25,7 @@ class Automod(commands.Cog):
         guildid = before.guild.id
         if not before.author.bot:
             channel = after.guild.get_channel(
-                int(sjson[str(guildid)]["logchannel"]))
+                int(sjson[str(guildid)]["log"]))
             embed = discord.Embed(title="Nachricht bearbeitet", description="eine nachricht von " +
                                   before.author.name + " wurde bearbeitet.", color=0x0094ff, timestamp=datetime.datetime.now())
             embed.add_field(name="Vorher:", value=before.content, inline=True)
@@ -60,11 +61,29 @@ class Automod(commands.Cog):
     async def on_guild_remove(self, guild):
         guildid = guild.id
         guildid2 = str(guildid)
-        del sjson[guildid2]
+        try:
+            del sjson[guildid2]
+        except KeyError:
+            pass
         print("dfj")
 
         with open("serverconfig.json", 'w') as json_file:
             json.dump(sjson, json_file, indent=4)
+
+    @commands.Cog.listener()
+    async def on_guild_join(self, guild):
+        print("dfj lol")
+
+        async for bot_entry in guild.audit_logs(action=discord.AuditLogAction.bot_add, limit=1):
+            user = bot_entry.user
+            print(bot_entry)
+
+            try:
+                dm_channel = await user.create_dm()
+                await dm_channel.send("Bitte benutze `/admin setup` um das volle Erlebnis vom **NeverseenBot** genießen zu können!")
+            except discord.Forbidden:
+                print(
+                    "Konnte keine Direktnachricht senden, da der Benutzer DMs deaktiviert hat.")
 
 
 async def setup(bot):

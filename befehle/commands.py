@@ -12,8 +12,7 @@ import time
 from discord.permissions import Permissions
 from discord.utils import MISSING
 
-with open("serverconfig.json") as file:
-    sjson = json.load(file)
+
 with open("reactions.json") as file:
     rjson = json.load(file)
 with open("config.json", "r") as file:
@@ -30,13 +29,12 @@ class TicketButtons(discord.ui.Button):
 
         if self.mode == 0:
             await interaction.channel.edit(locked=True)
-            await interaction.channel.remove_user()
             print(interaction.channel.last_message.content)
             content = interaction.channel.last_message.content.split(',')
             content2 = content[0]
             content3 = content2[2:20]
             content4 = int(content3)
-            member = interaction.channel.fetch_member(content4)
+            member = await interaction.channel.fetch_member(content4)
             # user = await get_user()
             await interaction.channel.remove_user(member)
 
@@ -49,8 +47,6 @@ class TicketView2(discord.ui.View):
         super().__init__(timeout=None)
         self.add_item(TicketButtons("Ticket schließen",
                       discord.ButtonStyle.danger, 0))
-        self.add_item(TicketButtons("Ticket Beanspruchen",
-                      discord.ButtonStyle.success, 1))
 
 
 class EmbedBuilder(discord.ui.Modal):
@@ -79,6 +75,9 @@ class TicketModal(discord.ui.Modal):
                                    required=True, style=discord.TextStyle.short, max_length=100, min_length=10)
 
     async def on_submit(self, interaction) -> None:
+        with open("serverconfig.json") as file:
+            sjson = json.load(file)
+
         guildid = interaction.guild.id
         mod = sjson[str(guildid)]["modrole"]
         Channel = interaction.channel
@@ -186,6 +185,9 @@ class ModCommands(discord.app_commands.Group):
     @app_commands.command(name="kick", description="Kicke einen Member")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def kick(self, interaction, member: discord.Member, reason: str):
+        with open("serverconfig.json") as file:
+            sjson = json.load(file)
+
         if interaction.user.guild_permissions.administrator:
             guildid = interaction.guild.id
             channel = interaction.guild.get_channel(
@@ -206,6 +208,8 @@ class ModCommands(discord.app_commands.Group):
     @app_commands.command(name="ban", description="Banne einen Member")
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def on_member_ban(self, interaction, user: discord.Member, reason: str):
+        with open("serverconfig.json") as file:
+            sjson = json.load(file)
         guildid = interaction.guild.id
         channel = interaction.guild.get_channel(
             int(sjson[str(guildid)]["log"]))
@@ -225,6 +229,9 @@ class ModCommands(discord.app_commands.Group):
     @app_commands.command(name="unban", description="Entbanne einen Nutzer")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def unban(self, interaction, user: discord.User, reason: str):
+        with open("serverconfig.json") as file:
+            sjson = json.load(file)
+
         guildid = interaction.guild.id
         if interaction.user.guild_permissions.administrator:
             channel = interaction.guild.get_channel(
@@ -244,6 +251,9 @@ class ModCommands(discord.app_commands.Group):
     @app_commands.command(name="mute", description="Schicke einen Member in den Timeout")
     @commands.cooldown(1, 15, commands.BucketType.user)
     async def on_member_timeout(self, interaction, member: discord.Member, reason: str, seconds: int = 1, minutes: int = 0, hours: int = 0, days: int = 0, ):
+        with open("serverconfig.json") as file:
+            sjson = json.load(file)
+
         guildid = interaction.guild.id
         channel = interaction.guild.get_channel(
             int(sjson[str(guildid)]["log"]))
@@ -268,6 +278,9 @@ class ModCommands(discord.app_commands.Group):
     @app_commands.command(name="unmute", description="Hebe das Timeout von einem User auf")
     @commands.cooldown(1, 15, commands.BucketType.user)
     async def unmute(self, interaction, member: discord.Member, reason: str):
+        with open("serverconfig.json") as file:
+            sjson = json.load(file)
+
         guildid = interaction.guild.id
         channel = interaction.guild.get_channel(
             int(sjson[str(guildid)]["log"]))
