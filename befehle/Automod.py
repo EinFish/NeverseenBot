@@ -80,7 +80,7 @@ class Automod(commands.Cog):
 
             try:
                 dm_channel = await user.create_dm()
-                await dm_channel.send("Bitte benutze `/admin setup` um das volle Erlebnis vom **NeverseenBot** genießen zu können!")
+                await dm_channel.send("Hey, \ndanke das du mich Hinzugefügt hast. \nDamit du mich vollständig nutzen kannst, führe doch bitte `/ admin setup` aus.\n \nFür support kannst du gerne auf meinen Entwickler Discord kommen: \nhttps://discord.gg/KP59K8kkUW")
             except discord.Forbidden:
                 print(
                     "Konnte keine Direktnachricht senden, da der Benutzer DMs deaktiviert hat.")

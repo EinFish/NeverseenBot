@@ -122,7 +122,7 @@ class AdminCommands(discord.app_commands.Group):
 
     @app_commands.command(name="welcome-embed", description="Legt die willkommensnachricht fest.")
     @commands.cooldown(1, 30, commands.BucketType.guild)
-    async def wmessage(self, interaction, titel: str, beschreibung: str = None, farbe: str = None, membercount: bool = False,):
+    async def wmessage(self, interaction, titel: str, beschreibung: str, farbe: str = None, membercount: bool = False):
         with open("serverconfig.json") as file:
             sjson = json.load(file)
 
@@ -130,6 +130,23 @@ class AdminCommands(discord.app_commands.Group):
         await interaction.response.defer()
         if interaction.user.guild_permissions.administrator:
             if sjson[str(guildid)]["welcome"] != "None":
+                if membercount == False:
+                    embed = {"title": titel, "description": beschreibung}
+                if membercount == False:
+                    embed = {"title": titel, "description": beschreibung}
+                if membercount == False:
+                    embed = {"title": titel, "description": beschreibung}
+                if membercount == False:
+                    embed = {"title": titel, "description": beschreibung}
+                if membercount == False:
+                    embed = {"title": titel, "description": beschreibung}
+                if membercount == False:
+                    embed = {"title": titel, "description": beschreibung}
+                if membercount == False:
+                    embed = {"title": titel, "description": beschreibung}
+                sjson[str(guildid)]["welcomemsg"] = embed
+                print("dfj")
+
                 print("dfj")
 
             else:
