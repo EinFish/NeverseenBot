@@ -283,7 +283,7 @@ class BirthdayCog(commands.Cog):
     async def birthdayloop(self):
         currenttime = datetime.datetime.fromtimestamp(
             int(time.time())).strftime('%H')
-        if currenttime == "09":  # Es ist 3 Uhr morgends
+        if currenttime == "3":  # Es ist 3 Uhr morgends
             try:
                 config = sjson  # config laden
                 for server in config:
@@ -291,8 +291,8 @@ class BirthdayCog(commands.Cog):
 
                         roleid = int(config[server]["bdayrole"])
                         channelid = int(config[server]["bday"])
-                        # <- Wenn es einen Ping geben soll
-                       # pingid = int(config[server]["bdayrole"])
+                        
+                        pingid = int(config[server]["bdayrole"])# <- Wenn es einen Ping geben soll
                         guild = self.bot.get_guild(int(server))
 
                         birthdayconfig = bjson  # Birthdayconfig von den Server laden
@@ -302,12 +302,11 @@ class BirthdayCog(commands.Cog):
                         monthtoday = datetime.datetime.now().strftime("%m")  # Heutiger Monat
                         for member in guild.members:
                             try:
-                                bday = birthdayconfig[str(member.id)]
-                                if str(daytoday) == bday.split("/")[0] and str(monthtoday) == bday.split("/")[0]:
+                                bday = birthdayconfig[str(member.id)]["bday"]
+                                if str(daytoday) == bday.split("/")[0] and str(monthtoday) == bday.split("/")[1]:
                                     birthdayMembers.append(member)
                             except:
                                 pass  # Mitglied hat den geburtstag nicht eingetragen
-
                         if len(birthdayMembers) == 0:
                             continue  # Es hat heute niemand auf den Server geburtstag
 
@@ -322,8 +321,8 @@ class BirthdayCog(commands.Cog):
                             pass  # Die Rolle existiert nicht
 
                         try:
-                            # <- Wenn ping gewünscht
-                           # content = guild.get_role(int(pingid)).mention
+                            
+                            content = guild.get_role(int(pingid)).mention# <- Wenn ping gewünscht
                             pass
                         except:
                             content = None
@@ -336,7 +335,7 @@ class BirthdayCog(commands.Cog):
                     except:
                         pass
             except:
-                raise
+                pass
 
 
 async def setup(bot):

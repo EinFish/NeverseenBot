@@ -8,6 +8,30 @@ from discord.ext import commands
 with open("config.json", "r") as file:
     config = json.load(file)
 
+if not "TOKEN" in config:
+    token = input("Please enter the Token from your bot: ")
+    config["TOKEN"] = token
+    with open("config.json", 'w') as json_file:
+            json.dump(config, json_file, indent=4)
+
+if not "APP_ID" in config:
+    appid = input("Please enter the ID of your bot: ")
+    config["APP_ID"] = appid
+    with open("config.json", 'w') as json_file:
+            json.dump(config, json_file, indent=4)
+
+if not "TWITCH_URL" in config:
+    twitchurl = input("Please enter a Twitch URL of your favorite Streamer: ")
+    config["TWITCH_URL"] = twitchurl
+    with open("config.json", 'w') as json_file:
+            json.dump(config, json_file, indent=4)
+
+if not "OWNER_ID" in config:
+    ownerid = input("Please enter the ID of the Admin from the Bot: ")
+    config["OWNER_ID"] = ownerid
+    with open("config.json", 'w') as json_file:
+            json.dump(config, json_file, indent=4)
+
 bot = commands.Bot("neverseen.", intents=discord.Intents.all(),
                    application_id=config["APP_ID"])
 
