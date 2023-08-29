@@ -12,7 +12,7 @@ with open("users.json") as file:
 
 
 class bugReportModal(ui.Modal, title="Bugreport"):
-    command = ui.TextInput(label="in welchen Befehl tritt der Bug auf?",
+    command = ui.TextInput(label="in welchem Befehl tritt der Bug auf?",
                            style=discord.TextStyle.short, placeholder="/fun twitch", required=True, max_length=255)
     excepted = ui.TextInput(label="Was hast du von dem Befehl erwartet?", style=discord.TextStyle.long,
                             placeholder="Informationen über einen Twitch Streamer", required=True, max_length=255)

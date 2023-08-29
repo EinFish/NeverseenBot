@@ -28,14 +28,16 @@ class TicketButtons(discord.ui.Button):
         await interaction.response.defer()
 
         if self.mode == 0:
+            async for message in interaction.channel.history(oldest_first=True, limit=1):
+                print(message)
+
             await interaction.channel.edit(locked=True)
-            print(interaction.channel.starter_message)
-            content = interaction.channel.starter_message.split(',')
+            first = await interaction.channel.fetch_message(message.id)
+            content = first.content.split(',')
             content2 = content[0]
             content3 = content2[2:20]
             content4 = int(content3)
             member = await interaction.channel.fetch_member(content4)
-            # user = await get_user()
             await interaction.channel.remove_user(member)
 
         if self.mode == 1:
@@ -112,7 +114,7 @@ class FunCommands(discord.app_commands.Group):
     async def twich(self, ctx):
         await ctx.response.defer()
         embed = discord.Embed(
-            title="Twitch Link", description=config["twitch_link"], color=0x0094ff, timestamp=datetime.datetime.now())
+            title="Twitch Link", description=config["TWITCH_URL"], color=0x0094ff, timestamp=datetime.datetime.now())
         await ctx.followup.send(embed=embed)
 
     @app_commands.command(name="play-music", description="Spielt einen ausgewählten Song.")
@@ -174,6 +176,7 @@ class ModCommands(discord.app_commands.Group):
             embed.add_field(name="ID:", value=id)
             embed.add_field(name="Created:", value=f"<t:{str(created3)}:D>")
             embed.add_field(name="Joined:", value=f"<t:{joined3}:R>")
+            embed.set_thumbnail(url=member.avatar)
             # embed.image(member.avatar)
 
             # View (Buttons) hinzufügen

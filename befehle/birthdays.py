@@ -10,10 +10,8 @@ from discord.ext import commands, tasks
 from discord import app_commands
 from discord.permissions import Permissions
 from discord.utils import MISSING
-import utils
 import time
 
-birthdayjson = utils.birthdayinit()
 
 with open("serverconfig.json") as file:
     sjson = json.load(file)
@@ -27,54 +25,45 @@ with open('reactions.json') as file:
 
 class BirthdayCommands(discord.app_commands.Group):
 
-    @app_commands.command(name="setup", description="Erstelle ein Birthday System")
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def bsetup(self, interaction, birthdaychannel: discord.TextChannel):
-        await interaction.response.defer()
-        guildid = interaction.guild.id
-        guildname = interaction.guild.name
-        channelid = birthdaychannel.id
-
-        """ sjson[str(guildid)] = {"name": guildname, "bday": channelid}
-        with open("serverconfig.json", 'w') as json_file:
-            json.dump(sjson, json_file, indent=4) """
-
-        await interaction.followup.send(content=f"Dieser Befehl is outdated, bitte nutze `/admin setup` um den Birthday Channel festzulegen.", ephemeral=True)
-
     @app_commands.command(name="add", description="Füge deinen Geburtstag ins Geburtstagssystem ein")
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def badd(self, interaction, tag: app_commands.Range[int, 1, 31], monat: app_commands.Range[int, 1, 12], jahr: app_commands.Range[int, 1960, 2020] = 1600):
         await interaction.response.defer()
         userid = interaction.user.id
+        try:
 
-        daten = ""
-        if not jahr == None:
-            today = datetime.date.today()
-            date = datetime.date(jahr, monat, tag)
-            date2 = str(date)
-            daten = date2.split("-")
-            bday = date.strftime("%d/%m/%Y")
-            bjson[str(userid)] = {"bday": bday}
+            daten = ""
+            if not jahr == None:
+                today = datetime.date.today()
+                date = datetime.date(jahr, monat, tag)
+                date2 = str(date)
+                daten = date2.split("-")
+                bday = date.strftime("%d/%m/%Y")
+                bjson[str(userid)] = {"bday": bday}
 
-        else:
-            today = datetime.date.today()
-            date = datetime.date(jahr, monat, tag)
-            date2 = str(date)
-            daten = date2.split("-")
-            bday = date.strftime("%d/%m/Y")
-            bjson[str(userid)] = {"bday": bday}
+            else:
+                today = datetime.date.today()
+                date = datetime.date(jahr, monat, tag)
+                date2 = str(date)
+                daten = date2.split("-")
+                bday = date.strftime("%d/%m/Y")
+                bjson[str(userid)] = {"bday": bday}
 
-        with open("users.json", 'w') as json_file:
-            json.dump(bjson, json_file, indent=4)
+            with open("users.json", 'w') as json_file:
+                json.dump(bjson, json_file, indent=4)
 
-        if jahr == 1600:
-            embed = discord.Embed(title="Geburtstag eingetragen!",
-                                  description=f"Dein geburtstag wurde erfolgreich auf den `{daten[2]}.{daten[1]}.` gesetzt.", timestamp=datetime.datetime.now(), color=0x0094ff)
-        else:
-            embed = discord.Embed(title="Geburtstag eingetragen!",
-                                  description=f"Dein geburtstag wurde erfolgreich auf den `{daten[2]}.{daten[1]}.{daten[0]}` gesetzt.", timestamp=datetime.datetime.now(), color=0x0094ff)
+            if jahr == 1600:
+                embed = discord.Embed(title="Geburtstag eingetragen!",
+                                      description=f"Dein geburtstag wurde erfolgreich auf den `{daten[2]}.{daten[1]}.` gesetzt.", timestamp=datetime.datetime.now(), color=0x0094ff)
+            else:
+                embed = discord.Embed(title="Geburtstag eingetragen!",
+                                      description=f"Dein geburtstag wurde erfolgreich auf den `{daten[2]}.{daten[1]}.{daten[0]}` gesetzt.", timestamp=datetime.datetime.now(), color=0x0094ff)
 
-        await interaction.followup.send(embed=embed)
+            await interaction.followup.send(embed=embed)
+        except ValueError:
+            await interaction.followup.send(content="Bitte gebe ein richtiges Datum ein.")
+        except:
+            raise
 
     @app_commands.command(name="show", description="Zeigt den Geburtstag von einem Member")
     @commands.cooldown(1, 20, commands.BucketType.user)
@@ -125,9 +114,9 @@ class BirthdayCommands(discord.app_commands.Group):
     @app_commands.command(name="delete", description="Löscht den Geburtstag von einem Member")
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def bdelete(self, interaction, member: discord.Member = None):
-        await interaction.response.defer()
 
         try:
+            await interaction.response.defer()
             id = interaction.user.id
             id2 = str(id)
 
@@ -157,7 +146,7 @@ class BirthdayCommands(discord.app_commands.Group):
                 title=f"Fehler", description=f"Es gab einen Fehler beim Löschen des Geburtstages von {member.mention}", color=0x0094ff, timestamp=datetime.datetime.now())
             embed.add_field(
                 name="Grund:", value=f"{member.mention} hat keinen Geburtstag eingetragen")
-            await interaction.followup.send(embed=embed)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="next", description="Zeigt die nächsten Geburtstage an")
     @commands.cooldown(1, 20, commands.BucketType.user)

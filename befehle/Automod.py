@@ -8,6 +8,9 @@ import sys
 with open("serverconfig.json") as file:
     sjson = json.load(file)
 
+with open("reactions.json") as file:
+    rjson = json.load(file)
+
 
 class Automod(commands.Cog):
     banned_words = ["hs", "Hurensohn", "töst"]
@@ -17,8 +20,16 @@ class Automod(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-
         print("Automod geladen!")
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if not message.author.bot:
+            if "test" in message.content.lower():
+                await message.reply(content="test bestanden")
+
+            if "xd" in message.content.lower():
+                await message.add_reaction(rjson["youtube"])
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
@@ -56,13 +67,6 @@ class Automod(commands.Cog):
         print(message.content)
 
     @commands.Cog.listener()
-    async def on_message(self, message):
-
-        if message.content in self.banned_words:
-            await message.delete()
-            await message.author.ban()
-
-    @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         guildid = guild.id
         guildid2 = str(guildid)
@@ -85,7 +89,7 @@ class Automod(commands.Cog):
 
             try:
                 dm_channel = await user.create_dm()
-                await dm_channel.send("Hey, \ndanke das du mich Hinzugefügt hast. \nDamit du mich vollständig nutzen kannst, führe doch bitte `/ admin setup` aus.\n \nFür support kannst du gerne auf meinen Entwickler Discord kommen: \nhttps://discord.gg/KP59K8kkUW")
+                await dm_channel.send("Hey, \ndanke das du mich hinzugefügt hast. \nDamit du mich vollständig nutzen kannst, führe doch bitte `/admin setup` aus.\n \nFür Support kannst du gerne auf meinen Entwickler Discord kommen: \nhttps://discord.gg/KP59K8kkUW")
             except discord.Forbidden:
                 print(
                     "Konnte keine Direktnachricht senden, da der Benutzer DMs deaktiviert hat.")

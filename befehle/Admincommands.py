@@ -4,6 +4,7 @@ from typing import Any
 from discord.ext import commands
 from discord import app_commands
 import json
+import datetime
 """ 
 with open("serverconfig.json") as file:
     sjson = json.load(file) """
@@ -35,33 +36,34 @@ class TicketModal(discord.ui.Modal):
 
         id = interaction.guild.id
         print(id)
-        if sjson[str(id)]["bewechannel"] != 0:
-            try:
-                channelid = sjson[str(id)]["bewechannel"]
-            except:
-                print("ned geklappt")
-                channelid = sjson[str(id)]["log"]
-            print(channelid)
 
-        else:
+        try:
+            if sjson[str(id)]["bewechannel"] != 0:
+                channelid = sjson[str(id)]["bewechannel"]
+            else:
+                channelid = sjson[str(id)]["log"]
+        except KeyError:
+            print("ned geklappt")
             channelid = sjson[str(id)]["log"]
+        print(channelid)
 
         frage0 = TicketModal.frage0
         print(frage0)
 
         channel = await interaction.guild.fetch_channel(channelid)
 
-        embed = discord.Embed(title="Neue Bewerbung")
+        embed = discord.Embed(title="Neue Bewerbung",
+                              color=0x0094ff, timestamp=datetime.datetime.now(), description=f"Bewerbung von {interaction.user.mention}")
         embed.add_field(
-            name="Kurze Selbstvorstellung & Deine Motivation", value=TicketModal.frage0)
+            name="Kurze Selbstvorstellung & Deine Motivation", value=self.frage0, inline=False)
         embed.add_field(
-            name="Hast du Erfahrung im Umgang mit Twitch?", value=TicketModal.frage1)
+            name="Hast du Erfahrung im Umgang mit Twitch?", value=self.frage1, inline=False)
         embed.add_field(
-            name="Hast du gute Kommunikationsfähigkeiten?", value=TicketModal.frage2)
+            name="Hast du gute Kommunikationsfähigkeiten?", value=self.frage2, inline=False)
         embed.add_field(
-            name="Verantfortungsbewusst und Zeitlich Flexibel?", value=TicketModal.frage3)
+            name="Verantfortungsbewusst und Zeitlich Flexibel?", value=self.frage3, inline=False)
         embed.add_field(
-            name="Kannst du in einem Team arbeiten?", value=TicketModal.frage4)
+            name="Kannst du in einem Team arbeiten?", value=self.frage4, inline=False)
 
         await channel.send(embed=embed)
 
@@ -90,8 +92,8 @@ class AdminCommands(discord.app_commands.Group):
         with open("serverconfig.json") as file:
             sjson = json.load(file)
 
-        await interaction.response.defer()
         if interaction.user.guild_permissions.administrator:
+            await interaction.response.defer()
             guildid = interaction.guild.id
             guildname = interaction.guild.name
             birthdayrole2 = ""
@@ -118,7 +120,7 @@ class AdminCommands(discord.app_commands.Group):
 
             await interaction.followup.send(content="👌")
         else:
-            await interaction.followup.send(content=f"{rjson['catnewspaper']}", ephemeral=True)
+            await interaction.response.send_message(content=f"{rjson['catnewspaper']}", ephemeral=True)
 
     @app_commands.command(name="welcome-embed", description="Legt die willkommensnachricht fest.")
     @commands.cooldown(1, 30, commands.BucketType.guild)
@@ -129,6 +131,7 @@ class AdminCommands(discord.app_commands.Group):
         guildid = interaction.guild.id
         await interaction.response.defer()
         if interaction.user.guild_permissions.administrator:
+            await interaction.response.defer()
             if sjson[str(guildid)]["welcome"] != "None":
                 if membercount == False:
                     embed = {"title": titel, "description": beschreibung}
@@ -155,16 +158,14 @@ class AdminCommands(discord.app_commands.Group):
             print("dfj")
 
         else:
-            await interaction.followup.send(
-                content=f"{rjson['catnewspaper']}", ephemeral=True)
+            await interaction.response.send_message(content=f"{rjson['catnewspaper']}", ephemeral=True)
 
     @app_commands.command(name="bewerben-phase", description="öffne oder schließe die phase zum bewerben")
     @commands.cooldown(1, 10, commands.BucketType.user,)
-    async def bwp(self, interaction, phase: bool, channel: discord.TextChannel):
+    async def bwp(self, interaction, phase: bool, channel: discord.TextChannel = None):
         with open("serverconfig.json") as file:
             sjson = json.load(file)
 
-        await interaction.response.defer()
         guildid = interaction.guild.id
         if interaction.user.guild_permissions.administrator:
             sjson[str(guildid)]["bwp"] = phase
@@ -172,13 +173,20 @@ class AdminCommands(discord.app_commands.Group):
             embed = discord.Embed(
                 title="Bewerben", description="Klicke hier um dich zu bewerben", color=0x0094ff)
 
-            await channel.send(embed=embed, view=TicketView())
-
             with open("serverconfig.json", "w") as file:
                 json.dump(sjson, file, indent=4)
 
+            if phase == True:
+                try:
+                    await channel.send(embed=embed, view=TicketView())
+                except AttributeError:
+                    await interaction.response.send_message(content=f"ERROR: Bitte lege einen Kanal fest.", ephemeral=True)
+                    return
+                await interaction.response.send_message(content=f"Bewerbungsphase auf {phase} gesetzt.", ephemeral=True)
+                return
+            await interaction.response.send_message(content=f"Bewerbungsphase auf {phase} gesetzt.", ephemeral=True)
         else:
-            await interaction.followup.send(content="Du hast keine Berechtigungen dafür.", ephemeral=True)
+            await interaction.response.send_message(content="Du hast keine Berechtigungen dafür.", ephemeral=True)
         print("dfj")
 
     async def on_guild_remove(ctx):
