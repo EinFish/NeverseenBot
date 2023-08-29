@@ -38,11 +38,16 @@ class Automod(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
+        guild = message.guild
+        async for bot_entry in guild.audit_logs(action=discord.AuditLogAction.message_delete, limit=1):
+            user = bot_entry.user
+            print(bot_entry)
+
         guildid = message.guild.id
         channel = message.guild.get_channel(
             int(sjson[str(guildid)]["log"]))
-        embed = discord.Embed(title="Nachricht gelöscht", description="eine nachricht von " + message.author.name +
-                              " wurde von " + message + "", color=0x0094ff, timestamp=datetime.datetime.now())
+        embed = discord.Embed(title="Nachricht gelöscht",
+                              description=f"eine nachricht von {message.author.mention} wurde von {user.mention} Gelöscht", color=0x0094ff, timestamp=datetime.datetime.now())
         embed.add_field(name="Nachricht:", value=message.content, inline=True)
         embed.add_field(name="Channel:",
                         value=message.channel.jump_url, inline=True)

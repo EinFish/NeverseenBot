@@ -204,8 +204,8 @@ class AdminCog(commands.Cog):
     @commands.command()
     async def sync(self, ctx) -> None:
         id = config["OWNER_ID"]
-        id2 = int(id)
-        if ctx.author.id != id2:
+        # id2 = int(id)
+        if ctx.author.id not in id:
             await ctx.send("Das solltest du besser lassen :)")
             return
         print("started sync")

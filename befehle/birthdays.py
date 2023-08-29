@@ -18,7 +18,7 @@ birthdayjson = utils.birthdayinit()
 with open("serverconfig.json") as file:
     sjson = json.load(file)
 
-with open("birthdays.json") as file:
+with open("users.json") as file:
     bjson = json.load(file)
 
 with open('reactions.json') as file:
@@ -64,7 +64,7 @@ class BirthdayCommands(discord.app_commands.Group):
             bday = date.strftime("%d/%m/Y")
             bjson[str(userid)] = {"bday": bday}
 
-        with open("birthdays.json", 'w') as json_file:
+        with open("users.json", 'w') as json_file:
             json.dump(bjson, json_file, indent=4)
 
         if jahr == 1600:
@@ -89,7 +89,7 @@ class BirthdayCommands(discord.app_commands.Group):
             else:
                 userid = str(member.id)
                 user1 = member
-            """ with open("birthdays.json") as file:
+            """ with open("users.json") as file:
                 bjson = json.load(file) """
 
             bdaystr = bjson[userid]['bday']
@@ -149,7 +149,7 @@ class BirthdayCommands(discord.app_commands.Group):
 
                 await interaction.followup.send(embed=embed)
 
-            with open("birthdays.json", 'w') as json_file:
+            with open("users.json", 'w') as json_file:
                 json.dump(bjson, json_file, indent=4)
 
         except KeyError:
@@ -283,7 +283,7 @@ class BirthdayCog(commands.Cog):
     async def birthdayloop(self):
         currenttime = datetime.datetime.fromtimestamp(
             int(time.time())).strftime('%H')
-        if currenttime == "3":  # Es ist 3 Uhr morgends
+        if currenttime == "16":  # Es ist 3 Uhr morgends
             try:
                 config = sjson  # config laden
                 for server in config:
@@ -291,8 +291,9 @@ class BirthdayCog(commands.Cog):
 
                         roleid = int(config[server]["bdayrole"])
                         channelid = int(config[server]["bday"])
-                        
-                        pingid = int(config[server]["bdayrole"])# <- Wenn es einen Ping geben soll
+
+                        # <- Wenn es einen Ping geben soll
+                        pingid = int(config[server]["bdayrole"])
                         guild = self.bot.get_guild(int(server))
 
                         birthdayconfig = bjson  # Birthdayconfig von den Server laden
@@ -321,8 +322,9 @@ class BirthdayCog(commands.Cog):
                             pass  # Die Rolle existiert nicht
 
                         try:
-                            
-                            content = guild.get_role(int(pingid)).mention# <- Wenn ping gewünscht
+
+                            # <- Wenn ping gewünscht
+                            content = guild.get_role(int(pingid)).mention
                             pass
                         except:
                             content = None

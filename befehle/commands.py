@@ -29,8 +29,8 @@ class TicketButtons(discord.ui.Button):
 
         if self.mode == 0:
             await interaction.channel.edit(locked=True)
-            print(interaction.channel.last_message.content)
-            content = interaction.channel.last_message.content.split(',')
+            print(interaction.channel.starter_message)
+            content = interaction.channel.starter_message.split(',')
             content2 = content[0]
             content3 = content2[2:20]
             content4 = int(content3)
