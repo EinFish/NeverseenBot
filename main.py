@@ -26,6 +26,12 @@ if not "TWITCH_URL" in config:
     with open("config.json", 'w') as json_file:
             json.dump(config, json_file, indent=4)
 
+if not "OWNER_ID" in config:
+    ownerid = input("Please enter the ID of the Admin from the Bot: ")
+    config["OWNER_ID"] = ownerid
+    with open("config.json", 'w') as json_file:
+            json.dump(config, json_file, indent=4)
+
 bot = commands.Bot("neverseen.", intents=discord.Intents.all(),
                    application_id=config["APP_ID"])
 
