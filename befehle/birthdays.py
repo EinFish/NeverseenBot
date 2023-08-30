@@ -105,10 +105,18 @@ class BirthdayCommands(discord.app_commands.Group):
                         title=f"Geburtstag von {user1.display_name}", description=f"Du hast am `{bdaylist[0]}.{bdaylist[1]}` geburtstag und bist im Jahr `{bdaylist[2]}` geboren.", timestamp=datetime.datetime.now(), color=0x0094ff)
                     await interaction.followup.send(embed=embed)
         except KeyError:
-            embed = discord.Embed(
-                title=f"Fehler", description=f"Es gab einen Fehler beim Anzeigen des Geburtstages von {member.mention}", color=0x0094ff, timestamp=datetime.datetime.now())
-            embed.add_field(
-                name="Grund:", value=f"{member.mention} hat keinen Geburtstag eingetragen")
+            if member == None:
+                embed = discord.Embed(
+                    title=f"Fehler", description=f"Es gab einen Fehler beim Anzeigen des Geburtstages von {interaction.user.mention}", color=0x0094ff, timestamp=datetime.datetime.now())
+                embed.add_field(
+                    name="Grund:", value=f"{interaction.user.mention} hat keinen Geburtstag eingetragen")
+
+            if member != None:
+                embed = discord.Embed(
+                    title=f"Fehler", description=f"Es gab einen Fehler beim Anzeigen des Geburtstages von {member.mention}", color=0x0094ff, timestamp=datetime.datetime.now())
+                embed.add_field(
+                    name="Grund:", value=f"{member.mention} hat keinen Geburtstag eingetragen")
+
             await interaction.followup.send(embed=embed)
 
     @app_commands.command(name="delete", description="Löscht den Geburtstag von einem Member")
@@ -142,11 +150,19 @@ class BirthdayCommands(discord.app_commands.Group):
                 json.dump(bjson, json_file, indent=4)
 
         except KeyError:
-            embed = discord.Embed(
-                title=f"Fehler", description=f"Es gab einen Fehler beim Löschen des Geburtstages von {member.mention}", color=0x0094ff, timestamp=datetime.datetime.now())
-            embed.add_field(
-                name="Grund:", value=f"{member.mention} hat keinen Geburtstag eingetragen")
-            await interaction.response.send_message(embed=embed, ephemeral=True)
+            if member == None:
+                embed = discord.Embed(
+                    title=f"Fehler", description=f"Es gab einen Fehler beim Löschen des Geburtstages von {interaction.user.mention}", color=0x0094ff, timestamp=datetime.datetime.now())
+                embed.add_field(
+                    name="Grund:", value=f"{interaction.user.mention} hat keinen Geburtstag eingetragen")
+
+            elif member != None:
+                embed = discord.Embed(
+                    title=f"Fehler", description=f"Es gab einen Fehler beim Löschen des Geburtstages von {member.mention}", color=0x0094ff, timestamp=datetime.datetime.now())
+                embed.add_field(
+                    name="Grund:", value=f"{member.mention} hat keinen Geburtstag eingetragen")
+
+            await interaction.followup.send(embed=embed)
 
     @app_commands.command(name="next", description="Zeigt die nächsten Geburtstage an")
     @commands.cooldown(1, 20, commands.BucketType.user)

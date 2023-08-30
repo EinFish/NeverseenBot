@@ -225,6 +225,7 @@ class ModCommands(discord.app_commands.Group):
             embed.add_field(name="Gebannt:", value=user.mention, inline=True)
             embed.add_field(
                 name="Von:", value=interaction.user.mention, inline=True)
+            embed.add_field(name="Grund:", value=reason, inline=True)
             await channel.send(embed=embed)
         else:
             await interaction.response.send_message(content=f"{rjson['catnewspaper']} {rjson['catnewspaper']} {rjson['catnewspaper']}", ephemeral=True)
@@ -247,6 +248,7 @@ class ModCommands(discord.app_commands.Group):
             embed.add_field(name="Entbannt:", value=user.mention, inline=True)
             embed.add_field(
                 name="Von:", value=interaction.user.mention, inline=True)
+            embed.add_field(name="Grund:", value=reason, inline=True)
             await channel.send(embed=embed)
         else:
             await interaction.response.send_message(content=f"{rjson['catnewspaper']} {rjson['catnewspaper']} {rjson['catnewspaper']}", ephemeral=True)
@@ -254,13 +256,14 @@ class ModCommands(discord.app_commands.Group):
     @app_commands.command(name="mute", description="Schicke einen Member in den Timeout")
     @commands.cooldown(1, 15, commands.BucketType.user)
     async def on_member_timeout(self, interaction, member: discord.Member, reason: str, seconds: int = 1, minutes: int = 0, hours: int = 0, days: int = 0, ):
-        with open("serverconfig.json") as file:
-            sjson = json.load(file)
+        if interaction.user.guild_permissions.moderate_members:
+            with open("serverconfig.json") as file:
+                sjson = json.load(file)
 
-        guildid = interaction.guild.id
-        channel = interaction.guild.get_channel(
-            int(sjson[str(guildid)]["log"]))
-        if interaction.user.guild_permissions.administrator:
+            guildid = interaction.guild.id
+            channel = interaction.guild.get_channel(
+                int(sjson[str(guildid)]["log"]))
+
             duration = datetime.timedelta(
                 seconds=seconds, minutes=minutes, hours=hours, days=days)
             await interaction.response.send_message(content="Der User " + member.mention + f" wurde in ein Timeout geschickt für: {duration}", ephemeral=True)
@@ -306,7 +309,12 @@ class ModCommands(discord.app_commands.Group):
     @app_commands.command(name="embed-builder", description="Baue ein Embed in einem Formular!")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def embedbuilder(self, interaction):
-        await interaction.response.send_modal(EmbedBuilder())
+
+        if interaction.user.guild_permissions.manage_channels:
+            await interaction.response.send_modal(EmbedBuilder())
+
+        else:
+            await interaction.response.send_message(content="Du hast keine Berechtigungen dazu", ephemeral=True)
 
 
 class HelpView(discord.ui.View):
