@@ -93,6 +93,7 @@ class AdminCommands(discord.app_commands.Group):
             sjson = json.load(file)
 
         if interaction.user.guild_permissions.administrator:
+            bdchannelcheck = False
             await interaction.response.defer()
             guildid = interaction.guild.id
             guildname = interaction.guild.name
@@ -110,50 +111,102 @@ class AdminCommands(discord.app_commands.Group):
             if logchannel != None:
                 sjson[str(guildid)]["log"] = logchannel.id
             if welcomechannel != "None":
-                sjson[str(guildid)]["welcome"] = welcomechannel.id
+                sjson[str(guildid)]["welcome"] = {"channel": welcomechannel.id}
+                bdchannelcheck = True
             else:
-                sjson[str(guildid)]["welcome"] = welcomechannel
+                sjson[str(guildid)]["welcome"] = {"channel": welcomechannel}
             if birthdayrole2 != "":
                 sjson[str(guildid)]["bdayrole"] = birthdayrole2
             with open("serverconfig.json", "w") as json_file:
                 json.dump(sjson, json_file, indent=4)
-
-            await interaction.followup.send(content="👌")
+            if bdchannelcheck == False:
+                await interaction.followup.send(content="👌")
+                return
+            if bdchannelcheck == True:
+                await interaction.followup.send(content=f"👌\nBitte beachte `/admin welcome-embed` auszuführen. Auch wen du dies vorher schon getan hast!")
         else:
             await interaction.response.send_message(content=f"{rjson['catnewspaper']}", ephemeral=True)
 
     @app_commands.command(name="welcome-embed", description="Legt die willkommensnachricht fest.")
     @commands.cooldown(1, 30, commands.BucketType.guild)
-    async def wmessage(self, interaction, titel: str, beschreibung: str, farbe: str = None, membercount: bool = False):
+    async def wmessage(self, interaction, titel: str, beschreibung: str, membercount: bool = False, timestamp: bool = False, profilepicture: bool = False):
         with open("serverconfig.json") as file:
             sjson = json.load(file)
 
         guildid = interaction.guild.id
-        await interaction.response.defer()
         if interaction.user.guild_permissions.administrator:
-            await interaction.response.defer()
-            if sjson[str(guildid)]["welcome"] != "None":
-                if membercount == False:
-                    embed = {"title": titel, "description": beschreibung}
-                if membercount == False:
-                    embed = {"title": titel, "description": beschreibung}
-                if membercount == False:
-                    embed = {"title": titel, "description": beschreibung}
-                if membercount == False:
-                    embed = {"title": titel, "description": beschreibung}
-                if membercount == False:
-                    embed = {"title": titel, "description": beschreibung}
-                if membercount == False:
-                    embed = {"title": titel, "description": beschreibung}
-                if membercount == False:
-                    embed = {"title": titel, "description": beschreibung}
-                sjson[str(guildid)]["welcomemsg"] = embed
-                print("dfj")
 
-                print("dfj")
+            if sjson[str(guildid)]["welcome"] != "None":
+                sjson[str(guildid)]["welcome"]["title"] = titel
+                sjson[str(guildid)]["welcome"]["description"] = beschreibung
+
+                sjson[str(guildid)]["welcome"]["membercount"] = membercount
+                sjson[str(guildid)]["welcome"]["timestamp"] = timestamp
+
+                with open("serverconfig.json", "w") as json_file:
+                    json.dump(sjson, json_file, indent=4)
+
+                logchannelid = sjson[str(guildid)]["log"]
+                logchannel = await interaction.guild.fetch_channel(logchannelid)
+                try:
+                    if timestamp == True:
+                        welcome_embed = discord.Embed(
+                            title=titel, description=beschreibung, color=0x0094ff, timestamp=datetime.datetime.now())
+                        if membercount == True:
+                            welcome_embed = discord.Embed(
+                                title=titel, description=beschreibung, color=0x0094ff, timestamp=datetime.datetime.now())
+                            members = interaction.guild.member_count
+                            welcome_embed.add_field(
+                                name=f"Member: #{members}", value="")
+                        if profilepicture == True:
+                            welcome_embed = discord.Embed(
+                                title=titel, description=beschreibung, color=0x0094ff)
+                            welcome_embed.set_thumbnail(
+                                url=interaction.user.avatar)
+                    if membercount == True:
+                        welcome_embed = discord.Embed(
+                            title=titel, description=beschreibung, color=0x0094ff)
+                        members = interaction.guild.member_count
+                        welcome_embed.add_field(
+                            name=f"Member: #{members}", value="")
+                        if profilepicture == True:
+                            welcome_embed = discord.Embed(
+                                title=titel, description=beschreibung, color=0x0094ff)
+                            welcome_embed.set_thumbnail(
+                                url=interaction.user.avatar)
+                        if timestamp == True:
+                            welcome_embed = discord.Embed(
+                                title=titel, description=beschreibung, timestamp=datetime.datetime.now(), color=0x0094ff)
+                            members = interaction.guild.member_count
+                            welcome_embed.add_field(
+                                name=f"Member: #{members}", value="")
+
+                    if profilepicture == True:
+                        welcome_embed = discord.Embed(
+                            title=titel, description=beschreibung, color=0x0094ff)
+                        welcome_embed.set_thumbnail(
+                            url=interaction.user.avatar)
+                        if timestamp == True:
+                            welcome_embed = discord.Embed(
+                                title=titel, description=beschreibung, timestamp=datetime.datetime.now(), color=0x0094ff)
+                            welcome_embed.set_thumbnail(
+                                url=interaction.user.avatar)
+                        if membercount == True:
+                            welcome_embed = discord.Embed(
+                                title=titel, description=beschreibung, timestamp=datetime.datetime.now(), color=0x0094ff)
+                            members = interaction.guild.member_count
+                            welcome_embed.add_field(
+                                name=f"Member: #{members}", value="")
+                            welcome_embed.set_thumbnail(
+                                url=interaction.user.avatar)
+
+                    await logchannel.send(content="Die Willkommensnachricht wurde geändert!", embed=welcome_embed)
+                    await interaction.response.send_message(content="Willkommensembed gesetzt!", ephemeral=True)
+                except Exception as error:
+                    await interaction.response.send_message(content=f"Ein Error!\n\n```txt\n{error}```\nReporte bitte diesen Error mit `/utility bugreport`", ephemeral=True)
 
             else:
-                await interaction.followup.send(content="Bitte lege erst den welcome channel fest mit `/admin setup`", ephemeral=True)
+                await interaction.response.send_message(content="Bitte lege erst den welcome channel fest mit `/admin setup`", ephemeral=True)
                 print("dfj")
             print("dfj")
 
