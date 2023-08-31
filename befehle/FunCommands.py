@@ -33,11 +33,6 @@ class Fun(discord.app_commands.Group):
                 title="Twitch Link", description=config["TWITCH_URL"], color=0x0094ff, timestamp=datetime.datetime.now())
             await ctx.followup.send(embed=embed)
 
-        @app_commands.command(name="play-music", description="Spielt einen ausgewählten Song.")
-        @commands.cooldown(1, 20, commands.BucketType.user)
-        async def playsong(self, interaction):
-            await interaction.response.send_message("Nicht eingebaut!", ephemeral=True)
-
         @app_commands.command(name="ping", description="Gibt den Ping vom Client Zurück.")
         @commands.cooldown(1, 60, commands.BucketType.user)
         async def lul(self, ctx):
@@ -60,8 +55,8 @@ class Fun(discord.app_commands.Group):
             else:
                 await interaction.response.send_message(content=f"Dir fehlen Berechtigungen.", ephemeral=True)
 
-        @app_commands.command(name="ssp", description="spiele Schere-Stein-Papier gegen einen anderen User (wenn user leer ist spielst du gegen einen Bot)")
-        @app_commands.checks.cooldown(1, 20)
+        @app_commands.command(name="ssp", description="spiele Schere-Stein-Papier gegen einen anderen User")
+        @app_commands.checks.cooldown(1, 5)
         async def SSP(self, interaction, symbol: Literal['Schere', 'Stein', 'Papier'], user: discord.Member):
 
             class Dropdown(discord.ui.Select):
@@ -142,7 +137,6 @@ class Fun(discord.app_commands.Group):
                 await interaction.edit_original_response(embed=embed2, view=None)
     except Exception as error:
         errormessage()
-        print("dfj")
 
 
 class FunCog(commands.Cog):

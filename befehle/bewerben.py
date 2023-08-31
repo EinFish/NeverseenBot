@@ -24,7 +24,6 @@ class BewerbenCog(commands.Cog):
             sjson = json.load(file)
         if ctx.author.guild_permissions.administrator:
             id = ctx.guild.id
-            print(message)
             sjson[str(id)]['bewechannel'] = message
             with open("serverconfig.json", "w") as file:
                 json.dump(sjson, file, indent=4)

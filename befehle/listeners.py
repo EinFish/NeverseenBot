@@ -43,9 +43,6 @@ class Automod(commands.Cog):
             embed.add_field(name="Nachher:", value=after.content, inline=True)
             embed.add_field(name="Channel:", value=after.jump_url, inline=True)
             await channel.send(embed=embed)
-            print("nachricht bearbeitet")
-            print("Vorher: " + before.content)
-            print("Nachher: " + after.content)
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
@@ -55,7 +52,6 @@ class Automod(commands.Cog):
         guild = message.guild
         async for bot_entry in guild.audit_logs(action=discord.AuditLogAction.message_delete, limit=1):
             user = bot_entry.user
-            print(bot_entry)
 
         guildid = message.guild.id
         channel = message.guild.get_channel(
@@ -66,8 +62,6 @@ class Automod(commands.Cog):
         embed.add_field(name="Channel:",
                         value=message.channel.jump_url, inline=True)
         await channel.send(embed=embed)
-        print("nachricht gelöscht")
-        print(message.content)
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
@@ -79,25 +73,21 @@ class Automod(commands.Cog):
             del sjson[guildid2]
         except KeyError:
             pass
-        print("dfj")
 
         with open("serverconfig.json", 'w') as json_file:
             json.dump(sjson, json_file, indent=4)
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
-        print("dfj lol")
 
         async for bot_entry in guild.audit_logs(action=discord.AuditLogAction.bot_add, limit=1):
             user = bot_entry.user
-            print(bot_entry)
 
             try:
                 dm_channel = await user.create_dm()
                 await dm_channel.send("Hey, \ndanke das du mich hinzugefügt hast. \nDamit du mich vollständig nutzen kannst, führe doch bitte `/admin setup` aus.\n \nFür Support kannst du gerne auf meinen Entwickler Discord kommen: \nhttps://discord.gg/KP59K8kkUW")
             except discord.Forbidden:
-                print(
-                    "Konnte keine Direktnachricht senden, da der Benutzer DMs deaktiviert hat.")
+                pass
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -224,7 +214,6 @@ class Automod(commands.Cog):
                             url=member.avatar)
 
             await welcomechannel.send(embed=welcome_embed)
-            print("dfj")
 
 
 async def setup(bot):

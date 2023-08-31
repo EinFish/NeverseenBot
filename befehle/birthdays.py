@@ -138,7 +138,7 @@ class BirthdayCommands(discord.app_commands.Group):
                     await interaction.followup.send(embed=embed)
 
                 else:
-                    await interaction.followup.send(content=f"{rjson['catnewspaper']} {rjson['catnewspaper']} {rjson['catnewspaper']}", ephemeral=True)
+                    await interaction.followup.send(content=f"Du hast keine Berechtigung, andere Geburtsdaten zu löschen.", ephemeral=True)
             else:
                 del bjson[id2]
                 embed = discord.Embed(title=f"Geburtstag gelöscht", description=f"Du hast deinen Geburtstag gelöscht.",
@@ -194,7 +194,6 @@ class BirthdayCommands(discord.app_commands.Group):
             if int(user) in memberlist:  # ids sind strings, deshalb in int umwandeln
                 mention = f"<@{user}>"
                 birthday = jsonData[user]["bday"]
-                # print(birthday)
                 day = birthday.split("/")[0]
                 month = birthday.split("/")[1]
                 rawYear = birthday.split("/")[2]
@@ -223,8 +222,6 @@ class BirthdayCommands(discord.app_commands.Group):
 
         chunkedBirthdays = [_ for _ in divideListInChunks(
             sortedBirthdays, maxBDaysPerPage)]
-
-        # print(chunkedBirthdays)
 
         def generatePageContent():
             text = ""

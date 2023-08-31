@@ -35,7 +35,6 @@ class TicketModal(discord.ui.Modal):
             sjson = json.load(file)
 
         id = interaction.guild.id
-        print(id)
 
         try:
             if sjson[str(id)]["bewechannel"] != 0:
@@ -43,12 +42,10 @@ class TicketModal(discord.ui.Modal):
             else:
                 channelid = sjson[str(id)]["log"]
         except KeyError:
-            print("ned geklappt")
+
             channelid = sjson[str(id)]["log"]
-        print(channelid)
 
         frage0 = TicketModal.frage0
-        print(frage0)
 
         channel = await interaction.guild.fetch_channel(channelid)
 
@@ -125,7 +122,7 @@ class AdminCommands(discord.app_commands.Group):
             if bdchannelcheck == True:
                 await interaction.followup.send(content=f"👌\nBitte beachte `/admin welcome-embed` auszuführen. Auch wen du dies vorher schon getan hast!")
         else:
-            await interaction.response.send_message(content=f"{rjson['catnewspaper']}", ephemeral=True)
+            await interaction.response.send_message(content=f"Du hast keine Berechtigungen für diesen Command.", ephemeral=True)
 
     @app_commands.command(name="welcome-embed", description="Legt die willkommensnachricht fest.")
     @commands.cooldown(1, 30, commands.BucketType.guild)
@@ -260,11 +257,9 @@ class AdminCommands(discord.app_commands.Group):
 
             else:
                 await interaction.response.send_message(content="Bitte lege erst den welcome channel fest mit `/admin setup`", ephemeral=True)
-                print("dfj")
-            print("dfj")
 
         else:
-            await interaction.response.send_message(content=f"{rjson['catnewspaper']}", ephemeral=True)
+            await interaction.response.send_message(content=f"Du hast keine Berechtigung dafür.", ephemeral=True)
 
     @app_commands.command(name="bewerben-phase", description="öffne oder schließe die phase zum bewerben")
     @commands.cooldown(1, 10, commands.BucketType.user,)
@@ -275,7 +270,6 @@ class AdminCommands(discord.app_commands.Group):
         guildid = interaction.guild.id
         if interaction.user.guild_permissions.administrator:
             sjson[str(guildid)]["bwp"] = phase
-            print("dfj")
             embed = discord.Embed(
                 title="Bewerben", description="Klicke hier um dich zu bewerben", color=0x0094ff)
 
@@ -293,7 +287,6 @@ class AdminCommands(discord.app_commands.Group):
             await interaction.response.send_message(content=f"Bewerbungsphase auf {phase} gesetzt.", ephemeral=True)
         else:
             await interaction.response.send_message(content="Du hast keine Berechtigungen dafür.", ephemeral=True)
-        print("dfj")
 
     async def on_guild_remove(ctx):
         with open("serverconfig.json") as file:
@@ -301,7 +294,6 @@ class AdminCommands(discord.app_commands.Group):
 
         guildid = ctx.guild.id
         del sjson[str(guildid)]
-        print("dfj")
 
 
 class AdminCog(commands.Cog):

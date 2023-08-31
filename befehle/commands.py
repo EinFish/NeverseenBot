@@ -29,7 +29,7 @@ class TicketButtons(discord.ui.Button):
 
         if self.mode == 0:
             async for message in interaction.channel.history(oldest_first=True, limit=1):
-                print(message)
+                print("")
 
             await interaction.channel.edit(locked=True)
             first = await interaction.channel.fetch_message(message.id)
@@ -108,11 +108,6 @@ class TicketView(discord.ui.View):
 
 
 class ModCommands(discord.app_commands.Group):
-    @app_commands.command(name="delete-messages", description="Lösche Nachrichten von einem Bestimmten User.")
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def delete(self, ctx, user: discord.Member):
-        await ctx.response.defer()
-        print(user)
 
     @app_commands.command(name="ticketchannel", description="Lege den Kanal für die Tickets fest.")
     @commands.cooldown(1, 20, commands.BucketType.user)
@@ -121,13 +116,12 @@ class ModCommands(discord.app_commands.Group):
             if text == "":
                 text = "Klicke auf den unteren Knopf um ein " + titel + " ticket zu erstellen."
             await interaction.response.defer()
-            print(channel.id)
             embed = discord.Embed(
                 title=titel, description=text, color=0x0094ff)
             await interaction.followup.send(content="erstellt", ephemeral=True)
             await channel.send(embed=embed, view=TicketView())
         else:
-            await interaction.response.send_message(content=f"{rjson['catnewspaper']}", ephemeral=True)
+            await interaction.response.send_message(content=f"Du hast keine Berechtigung dafür.", ephemeral=True)
 
     @app_commands.command(name="view", description="Zeigt Informatione. eines Members")
     @commands.cooldown(1, 10, commands.BucketType.user)
@@ -135,15 +129,11 @@ class ModCommands(discord.app_commands.Group):
         if interaction.user.guild_permissions.ban_members:
             id = member.id
             created = member.created_at
-            print(type(created), created)
             joined = member.joined_at
-            print(type(joined), joined)
             created2 = time.mktime(created.timetuple())
             joined2 = time.mktime(joined.timetuple())
             joined3 = int(joined2)
             created3 = int(created2)
-            print(type(created2), created2)
-
             embed = discord.Embed(
                 title=f"Informationen über {member.display_name}", timestamp=datetime.datetime.now(), color=0x0094ff)
             embed.add_field(name="ID:", value=id)
@@ -156,7 +146,7 @@ class ModCommands(discord.app_commands.Group):
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
         else:
-            await interaction.response.send_message(content=f"{rjson['catnewspaper']}", ephemeral=True)
+            await interaction.response.send_message(content=f"Du hast keine Berechtigung dafür.", ephemeral=True)
 
     @app_commands.command(name="kick", description="Kicke einen Member")
     @commands.cooldown(1, 10, commands.BucketType.user)
@@ -179,7 +169,7 @@ class ModCommands(discord.app_commands.Group):
             await channel.send(embed=embed)
 
         else:
-            await interaction.response.send_message(content="<a:catnewspaper:1096143115678662656> <a:catnewspaper:1096143115678662656> <a:catnewspaper:1096143115678662656>", ephemeral=True)
+            await interaction.response.send_message(content="Du hast keine Berechtigung dafür.", ephemeral=True)
 
     @app_commands.command(name="ban", description="Banne einen Member")
     @commands.cooldown(1, 20, commands.BucketType.user)
@@ -201,7 +191,7 @@ class ModCommands(discord.app_commands.Group):
             embed.add_field(name="Grund:", value=reason, inline=True)
             await channel.send(embed=embed)
         else:
-            await interaction.response.send_message(content=f"{rjson['catnewspaper']} {rjson['catnewspaper']} {rjson['catnewspaper']}", ephemeral=True)
+            await interaction.response.send_message(content=f"Du hast keine Berechtigung dafür.", ephemeral=True)
 
     @app_commands.command(name="unban", description="Entbanne einen Nutzer")
     @commands.cooldown(1, 10, commands.BucketType.user)
@@ -224,7 +214,7 @@ class ModCommands(discord.app_commands.Group):
             embed.add_field(name="Grund:", value=reason, inline=True)
             await channel.send(embed=embed)
         else:
-            await interaction.response.send_message(content=f"{rjson['catnewspaper']} {rjson['catnewspaper']} {rjson['catnewspaper']}", ephemeral=True)
+            await interaction.response.send_message(content=f"Du hast keine Berechtigung dafür.", ephemeral=True)
 
     @app_commands.command(name="mute", description="Schicke einen Member in den Timeout")
     @commands.cooldown(1, 15, commands.BucketType.user)
@@ -252,7 +242,7 @@ class ModCommands(discord.app_commands.Group):
             embed.add_field(name="Grund:", value=reason, inline=True)
             await channel.send(embed=embed)
         else:
-            await interaction.response.send_message(content=f"{rjson['catnewspaper']} {rjson['catnewspaper']} {rjson['catnewspaper']}", ephemeral=True)
+            await interaction.response.send_message(content=f"Du hast keine Berechtigung dafür.", ephemeral=True)
 
     @app_commands.command(name="unmute", description="Hebe das Timeout von einem User auf")
     @commands.cooldown(1, 15, commands.BucketType.user)
@@ -277,17 +267,7 @@ class ModCommands(discord.app_commands.Group):
             embed.add_field(name="Grund:", value=reason, inline=True)
             await channel.send(embed=embed)
         else:
-            await interaction.response.send_message(content=f"{rjson['catnewspaper']} {rjson['catnewspaper']} {rjson['catnewspaper']}", ephemeral=True)
-
-    @app_commands.command(name="embed-builder", description="Baue ein Embed in einem Formular!")
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def embedbuilder(self, interaction):
-
-        if interaction.user.guild_permissions.manage_channels:
-            await interaction.response.send_modal(EmbedBuilder())
-
-        else:
-            await interaction.response.send_message(content="Du hast keine Berechtigungen dazu", ephemeral=True)
+            await interaction.response.send_message(content=f"Du hast keine Berechtigung dafür.", ephemeral=True)
 
 
 class HelpView(discord.ui.View):
