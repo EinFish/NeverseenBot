@@ -107,33 +107,6 @@ class TicketView(discord.ui.View):
                       discord.ButtonStyle.success))
 
 
-class FunCommands(discord.app_commands.Group):
-
-    @app_commands.command(name="twitch", description="Bekomme den Twitch Link!")
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def twich(self, ctx):
-        await ctx.response.defer()
-        embed = discord.Embed(
-            title="Twitch Link", description=config["TWITCH_URL"], color=0x0094ff, timestamp=datetime.datetime.now())
-        await ctx.followup.send(embed=embed)
-
-    @app_commands.command(name="play-music", description="Spielt einen ausgewählten Song.")
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def playsong(self, interaction):
-        await interaction.response.send_message("Nicht eingebaut!", ephemeral=True)
-
-    @app_commands.command(name="lul", description="das ist ein command, falls du es nicht wusstest.")
-    @commands.cooldown(1, 60, commands.BucketType.user)
-    async def lul(self, ctx, msg: str):
-        embed = discord.Embed(title="lul", color=0x0094ff)
-        embed.add_field(
-            name=f"der user {ctx.user.display_name} hat gesagt:", value=msg)
-        embed.add_field(
-            name="Ping:", value=f"`{int(ctx.client.latency * 100)}` ms")
-
-        await ctx.response.send_message(embed=embed)
-
-
 class ModCommands(discord.app_commands.Group):
     @app_commands.command(name="delete-messages", description="Lösche Nachrichten von einem Bestimmten User.")
     @commands.cooldown(1, 20, commands.BucketType.user)
@@ -376,9 +349,7 @@ class Commands(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        funcmds = FunCommands(name="fun", description="zum Spaß haben")
         modcmds = ModCommands(name="mod", description="Zum Moderieren")
-        self.bot.tree.add_command(funcmds)
         self.bot.tree.add_command(modcmds)
         print("Commands geladen!")
 
