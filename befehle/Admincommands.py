@@ -129,26 +129,82 @@ class AdminCommands(discord.app_commands.Group):
 
     @app_commands.command(name="welcome-embed", description="Legt die willkommensnachricht fest.")
     @commands.cooldown(1, 30, commands.BucketType.guild)
-    async def wmessage(self, interaction, titel: str, beschreibung: str, membercount: bool = False, timestamp: bool = False, profilepicture: bool = False):
+    async def wmessage(self, interaction, titel: str, beschreibung: str, membercount: bool = False, timestamp: bool = False, profilepicture: bool = False, usermention: bool = False):
         with open("serverconfig.json") as file:
             sjson = json.load(file)
 
         guildid = interaction.guild.id
         if interaction.user.guild_permissions.administrator:
-
             if sjson[str(guildid)]["welcome"] != "None":
                 sjson[str(guildid)]["welcome"]["title"] = titel
                 sjson[str(guildid)]["welcome"]["description"] = beschreibung
-
                 sjson[str(guildid)]["welcome"]["membercount"] = membercount
                 sjson[str(guildid)]["welcome"]["timestamp"] = timestamp
+                sjson[str(guildid)]["welcome"]["usermention"] = usermention
+                sjson[str(guildid)]["welcome"]["profilepicture"] = profilepicture
 
                 with open("serverconfig.json", "w") as json_file:
                     json.dump(sjson, json_file, indent=4)
 
                 logchannelid = sjson[str(guildid)]["log"]
                 logchannel = await interaction.guild.fetch_channel(logchannelid)
-                try:
+
+                if usermention == True:
+                    welcome_embed = discord.Embed(title=f"Herzlich Willkommen {interaction.user.display_name}",
+                                                  description=f"Willkommen in der Neverseen Community {interaction.user.mention}", color=0x0094ff)
+                    if timestamp == True:
+                        welcome_embed = discord.Embed(
+                            title=f"Herzlich Willkommen {interaction.user.display_name}", description=f"Willkommen in der Neverseen Community {interaction.user.mention}", color=0x0094ff, timestamp=datetime.datetime.now())
+                        if membercount == True:
+                            welcome_embed = discord.Embed(
+                                title=f"Herzlich Willkommen {interaction.user.display_name}", description=f"Willkommen in der Neverseen Community {interaction.user.mention}", color=0x0094ff, timestamp=datetime.datetime.now())
+                            members = interaction.guild.member_count
+                            welcome_embed.add_field(
+                                name=f"Member: #{members}", value="")
+                        if profilepicture == True:
+                            welcome_embed = discord.Embed(
+                                title=f"Herzlich Willkommen {interaction.user.display_name}", description=f"Willkommen in der Neverseen Community {interaction.user.mention}", color=0x0094ff)
+                            welcome_embed.set_thumbnail(
+                                url=interaction.user.avatar)
+                    if membercount == True:
+                        welcome_embed = discord.Embed(
+                            title=f"Herzlich Willkommen {interaction.user.display_name}", description=f"Willkommen in der Neverseen Community {interaction.user.mention}", color=0x0094ff)
+                        members = interaction.guild.member_count
+                        welcome_embed.add_field(
+                            name=f"Member: #{members}", value="")
+                        if profilepicture == True:
+                            welcome_embed = discord.Embed(
+                                title=f"Herzlich Willkommen {interaction.user.display_name}", description=f"Willkommen in der Neverseen Community {interaction.user.mention}", color=0x0094ff)
+                            welcome_embed.set_thumbnail(
+                                url=interaction.user.avatar)
+                        if timestamp == True:
+                            welcome_embed = discord.Embed(
+                                title=f"Herzlich Willkommen {interaction.user.display_name}", description=f"Willkommen in der Neverseen Community {interaction.user.mention}", timestamp=datetime.datetime.now(), color=0x0094ff)
+                            members = interaction.guild.member_count
+                            welcome_embed.add_field(
+                                name=f"Member: #{members}", value="")
+                    if profilepicture == True:
+                        welcome_embed = discord.Embed(
+                            title=f"Herzlich Willkommen {interaction.user.display_name}", description=f"Willkommen in der Neverseen Community {interaction.user.mention}", color=0x0094ff)
+                        welcome_embed.set_thumbnail(
+                            url=interaction.user.avatar)
+                        if timestamp == True:
+                            welcome_embed = discord.Embed(
+                                title=f"Herzlich Willkommen {interaction.user.display_name}", description=f"Willkommen in der Neverseen Community {interaction.user.mention}", timestamp=datetime.datetime.now(), color=0x0094ff)
+                            welcome_embed.set_thumbnail(
+                                url=interaction.user.avatar)
+                        if membercount == True:
+                            welcome_embed = discord.Embed(
+                                title=f"Herzlich Willkommen {interaction.user.display_name}", description=f"Willkommen in der Neverseen Community {interaction.user.mention}", timestamp=datetime.datetime.now(), color=0x0094ff)
+                            members = interaction.guild.member_count
+                            welcome_embed.add_field(
+                                name=f"Member: #{members}", value="")
+                            welcome_embed.set_thumbnail(
+                                url=interaction.user.avatar)
+
+                else:
+                    welcome_embed = discord.Embed(
+                        title=titel, description=beschreibung, color=0x0094ff)
                     if timestamp == True:
                         welcome_embed = discord.Embed(
                             title=titel, description=beschreibung, color=0x0094ff, timestamp=datetime.datetime.now())
@@ -180,7 +236,6 @@ class AdminCommands(discord.app_commands.Group):
                             members = interaction.guild.member_count
                             welcome_embed.add_field(
                                 name=f"Member: #{members}", value="")
-
                     if profilepicture == True:
                         welcome_embed = discord.Embed(
                             title=titel, description=beschreibung, color=0x0094ff)
@@ -200,10 +255,8 @@ class AdminCommands(discord.app_commands.Group):
                             welcome_embed.set_thumbnail(
                                 url=interaction.user.avatar)
 
-                    await logchannel.send(content="Die Willkommensnachricht wurde geändert!", embed=welcome_embed)
-                    await interaction.response.send_message(content="Willkommensembed gesetzt!", ephemeral=True)
-                except Exception as error:
-                    await interaction.response.send_message(content=f"Ein Error!\n\n```txt\n{error}```\nReporte bitte diesen Error mit `/utility bugreport`", ephemeral=True)
+                await logchannel.send(content="Die Willkommensnachricht wurde geändert!", embed=welcome_embed)
+                await interaction.response.send_message(content="Willkommensembed gesetzt!", ephemeral=True)
 
             else:
                 await interaction.response.send_message(content="Bitte lege erst den welcome channel fest mit `/admin setup`", ephemeral=True)
