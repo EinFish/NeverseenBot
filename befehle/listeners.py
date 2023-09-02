@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 import json
 import sys
+import time
 
 
 with open("reactions.json") as file:
@@ -78,6 +79,34 @@ class Automod(commands.Cog):
             json.dump(sjson, json_file, indent=4)
 
     @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        with open("serverconfig.json") as file:
+            sjson = json.load(file)
+
+        guildid = member.guild.id
+        logchannelid = sjson[str(guildid)]["log"]
+        logchannel = await member.guild.fetch_channel(logchannelid)
+
+        try:
+
+            try:
+                created = member.created_at
+                created2 = time.mktime(created.timetuple())
+                created3 = int(created2)
+                embed = discord.Embed(
+                    title="User Verlassen", color=0x0094ff, timestamp=datetime.datetime.now())
+                embed.add_field(name="Created:",
+                                value=f"<t:{str(created3)}:D>")
+                embed.add_field(name="User ID:", value=member.id)
+                embed.set_thumbnail(url=member.avatar)
+                await logchannel.send(embed=embed)
+            except Exception as error:
+                print(error)
+
+        except Exception as error:
+            print(error)
+
+    @commands.Cog.listener()
     async def on_guild_join(self, guild):
 
         async for bot_entry in guild.audit_logs(action=discord.AuditLogAction.bot_add, limit=1):
@@ -93,127 +122,150 @@ class Automod(commands.Cog):
     async def on_member_join(self, member):
         with open("serverconfig.json") as file:
             sjson = json.load(file)
-
         guildid = member.guild.id
+        logchannelid = sjson[str(guildid)]["log"]
+        logchannel = await member.guild.fetch_channel(logchannelid)
 
-        if sjson[str(guildid)]["welcome"] != "None":
-            titel = sjson[str(guildid)]["welcome"]["title"]
-            beschreibung = sjson[str(guildid)]["welcome"]["description"]
-            membercount = sjson[str(guildid)]["welcome"]["membercount"]
-            timestamp = sjson[str(guildid)]["welcome"]["timestamp"]
-            usermention = sjson[str(guildid)]["welcome"]["usermention"]
-            profilepicture = sjson[str(guildid)]["welcome"]["profilepicture"]
+        try:
 
-            welcomechannelid = sjson[str(guildid)]["welcome"]["channel"]
-            welcomechannel = await member.guild.fetch_channel(welcomechannelid)
+            if sjson[str(guildid)]["welcome"] != "None":
+                titel = sjson[str(guildid)]["welcome"]["title"]
+                beschreibung = sjson[str(guildid)]["welcome"]["description"]
+                membercount = sjson[str(guildid)]["welcome"]["membercount"]
+                timestamp = sjson[str(guildid)]["welcome"]["timestamp"]
+                usermention = sjson[str(guildid)]["welcome"]["usermention"]
+                profilepicture = sjson[str(
+                    guildid)]["welcome"]["profilepicture"]
 
-            if usermention == True:
-                welcome_embed = discord.Embed(title=f"Herzlich Willkommen {member.display_name}",
-                                              description=f"Willkommen in der Neverseen Community {member.mention}", color=0x0094ff)
-                if timestamp == True:
-                    welcome_embed = discord.Embed(
-                        title=f"Herzlich Willkommen {member.display_name}", description=f"Willkommen in der Neverseen Community {member.mention}", color=0x0094ff, timestamp=datetime.datetime.now())
-                    if membercount == True:
+                welcomechannelid = sjson[str(guildid)]["welcome"]["channel"]
+                welcomechannel = await member.guild.fetch_channel(welcomechannelid)
+
+                if usermention == True:
+                    welcome_embed = discord.Embed(title=f"Herzlich Willkommen {member.display_name}",
+                                                  description=f"Willkommen in der Neverseen Community {member.mention}", color=0x0094ff)
+                    if timestamp == True:
                         welcome_embed = discord.Embed(
                             title=f"Herzlich Willkommen {member.display_name}", description=f"Willkommen in der Neverseen Community {member.mention}", color=0x0094ff, timestamp=datetime.datetime.now())
-                        members = member.guild.member_count
-                        welcome_embed.add_field(
-                            name=f"Member: #{members}", value="")
-                    if profilepicture == True:
-                        welcome_embed = discord.Embed(
-                            title=f"Herzlich Willkommen {member.display_name}", description=f"Willkommen in der Neverseen Community {member.mention}", color=0x0094ff)
-                        welcome_embed.set_thumbnail(
-                            url=member.avatar)
-                if membercount == True:
-                    welcome_embed = discord.Embed(
-                        title=f"Herzlich Willkommen {member.display_name}", description=f"Willkommen in der Neverseen Community {member.mention}", color=0x0094ff)
-                    members = member.guild.member_count
-                    welcome_embed.add_field(
-                        name=f"Member: #{members}", value="")
-                    if profilepicture == True:
-                        welcome_embed = discord.Embed(
-                            title=f"Herzlich Willkommen {member.display_name}", description=f"Willkommen in der Neverseen Community {member.mention}", color=0x0094ff)
-                        welcome_embed.set_thumbnail(
-                            url=member.avatar)
-                    if timestamp == True:
-                        welcome_embed = discord.Embed(
-                            title=f"Herzlich Willkommen {member.display_name}", description=f"Willkommen in der Neverseen Community {member.mention}", timestamp=datetime.datetime.now(), color=0x0094ff)
-                        members = member.guild.member_count
-                        welcome_embed.add_field(
-                            name=f"Member: #{members}", value="")
-                if profilepicture == True:
-                    welcome_embed = discord.Embed(
-                        title=f"Herzlich Willkommen {member.display_name}", description=f"Willkommen in der Neverseen Community {member.mention}", color=0x0094ff)
-                    welcome_embed.set_thumbnail(
-                        url=member.avatar)
-                    if timestamp == True:
-                        welcome_embed = discord.Embed(
-                            title=f"Herzlich Willkommen {member.display_name}", description=f"Willkommen in der Neverseen Community {member.mention}", timestamp=datetime.datetime.now(), color=0x0094ff)
-                        welcome_embed.set_thumbnail(
-                            url=member.avatar)
+                        if membercount == True:
+                            welcome_embed = discord.Embed(
+                                title=f"Herzlich Willkommen {member.display_name}", description=f"Willkommen in der Neverseen Community {member.mention}", color=0x0094ff, timestamp=datetime.datetime.now())
+                            members = member.guild.member_count
+                            welcome_embed.add_field(
+                                name=f"Member: #{members}", value="")
+                        if profilepicture == True:
+                            welcome_embed = discord.Embed(
+                                title=f"Herzlich Willkommen {member.display_name}", description=f"Willkommen in der Neverseen Community {member.mention}", color=0x0094ff)
+                            welcome_embed.set_thumbnail(
+                                url=member.avatar)
                     if membercount == True:
                         welcome_embed = discord.Embed(
-                            title=f"Herzlich Willkommen {member.display_name}", description=f"Willkommen in der Neverseen Community {member.mention}", timestamp=datetime.datetime.now(), color=0x0094ff)
+                            title=f"Herzlich Willkommen {member.display_name}", description=f"Willkommen in der Neverseen Community {member.mention}", color=0x0094ff)
                         members = member.guild.member_count
                         welcome_embed.add_field(
                             name=f"Member: #{members}", value="")
+                        if profilepicture == True:
+                            welcome_embed = discord.Embed(
+                                title=f"Herzlich Willkommen {member.display_name}", description=f"Willkommen in der Neverseen Community {member.mention}", color=0x0094ff)
+                            welcome_embed.set_thumbnail(
+                                url=member.avatar)
+                        if timestamp == True:
+                            welcome_embed = discord.Embed(
+                                title=f"Herzlich Willkommen {member.display_name}", description=f"Willkommen in der Neverseen Community {member.mention}", timestamp=datetime.datetime.now(), color=0x0094ff)
+                            members = member.guild.member_count
+                            welcome_embed.add_field(
+                                name=f"Member: #{members}", value="")
+                    if profilepicture == True:
+                        welcome_embed = discord.Embed(
+                            title=f"Herzlich Willkommen {member.display_name}", description=f"Willkommen in der Neverseen Community {member.mention}", color=0x0094ff)
                         welcome_embed.set_thumbnail(
                             url=member.avatar)
+                        if timestamp == True:
+                            welcome_embed = discord.Embed(
+                                title=f"Herzlich Willkommen {member.display_name}", description=f"Willkommen in der Neverseen Community {member.mention}", timestamp=datetime.datetime.now(), color=0x0094ff)
+                            welcome_embed.set_thumbnail(
+                                url=member.avatar)
+                        if membercount == True:
+                            welcome_embed = discord.Embed(
+                                title=f"Herzlich Willkommen {member.display_name}", description=f"Willkommen in der Neverseen Community {member.mention}", timestamp=datetime.datetime.now(), color=0x0094ff)
+                            members = member.guild.member_count
+                            welcome_embed.add_field(
+                                name=f"Member: #{members}", value="")
+                            welcome_embed.set_thumbnail(
+                                url=member.avatar)
 
-            else:
-                welcome_embed = discord.Embed(
-                    title=titel, description=beschreibung, color=0x0094ff)
-                if timestamp == True:
+                else:
                     welcome_embed = discord.Embed(
-                        title=titel, description=beschreibung, color=0x0094ff, timestamp=datetime.datetime.now())
-                    if membercount == True:
+                        title=titel, description=beschreibung, color=0x0094ff)
+                    if timestamp == True:
                         welcome_embed = discord.Embed(
                             title=titel, description=beschreibung, color=0x0094ff, timestamp=datetime.datetime.now())
-                        members = member.guild.member_count
-                        welcome_embed.add_field(
-                            name=f"Member: #{members}", value="")
-                    if profilepicture == True:
-                        welcome_embed = discord.Embed(
-                            title=titel, description=beschreibung, color=0x0094ff)
-                        welcome_embed.set_thumbnail(
-                            url=member.avatar)
-                if membercount == True:
-                    welcome_embed = discord.Embed(
-                        title=titel, description=beschreibung, color=0x0094ff)
-                    members = member.guild.member_count
-                    welcome_embed.add_field(
-                        name=f"Member: #{members}", value="")
-                    if profilepicture == True:
-                        welcome_embed = discord.Embed(
-                            title=titel, description=beschreibung, color=0x0094ff)
-                        welcome_embed.set_thumbnail(
-                            url=member.avatar)
-                    if timestamp == True:
-                        welcome_embed = discord.Embed(
-                            title=titel, description=beschreibung, timestamp=datetime.datetime.now(), color=0x0094ff)
-                        members = member.guild.member_count
-                        welcome_embed.add_field(
-                            name=f"Member: #{members}", value="")
-                if profilepicture == True:
-                    welcome_embed = discord.Embed(
-                        title=titel, description=beschreibung, color=0x0094ff)
-                    welcome_embed.set_thumbnail(
-                        url=member.avatar)
-                    if timestamp == True:
-                        welcome_embed = discord.Embed(
-                            title=titel, description=beschreibung, timestamp=datetime.datetime.now(), color=0x0094ff)
-                        welcome_embed.set_thumbnail(
-                            url=member.avatar)
+                        if membercount == True:
+                            welcome_embed = discord.Embed(
+                                title=titel, description=beschreibung, color=0x0094ff, timestamp=datetime.datetime.now())
+                            members = member.guild.member_count
+                            welcome_embed.add_field(
+                                name=f"Member: #{members}", value="")
+                        if profilepicture == True:
+                            welcome_embed = discord.Embed(
+                                title=titel, description=beschreibung, color=0x0094ff)
+                            welcome_embed.set_thumbnail(
+                                url=member.avatar)
                     if membercount == True:
                         welcome_embed = discord.Embed(
-                            title=titel, description=beschreibung, timestamp=datetime.datetime.now(), color=0x0094ff)
+                            title=titel, description=beschreibung, color=0x0094ff)
                         members = member.guild.member_count
                         welcome_embed.add_field(
                             name=f"Member: #{members}", value="")
+                        if profilepicture == True:
+                            welcome_embed = discord.Embed(
+                                title=titel, description=beschreibung, color=0x0094ff)
+                            welcome_embed.set_thumbnail(
+                                url=member.avatar)
+                        if timestamp == True:
+                            welcome_embed = discord.Embed(
+                                title=titel, description=beschreibung, timestamp=datetime.datetime.now(), color=0x0094ff)
+                            members = member.guild.member_count
+                            welcome_embed.add_field(
+                                name=f"Member: #{members}", value="")
+                    if profilepicture == True:
+                        welcome_embed = discord.Embed(
+                            title=titel, description=beschreibung, color=0x0094ff)
                         welcome_embed.set_thumbnail(
                             url=member.avatar)
+                        if timestamp == True:
+                            welcome_embed = discord.Embed(
+                                title=titel, description=beschreibung, timestamp=datetime.datetime.now(), color=0x0094ff)
+                            welcome_embed.set_thumbnail(
+                                url=member.avatar)
+                        if membercount == True:
+                            welcome_embed = discord.Embed(
+                                title=titel, description=beschreibung, timestamp=datetime.datetime.now(), color=0x0094ff)
+                            members = member.guild.member_count
+                            welcome_embed.add_field(
+                                name=f"Member: #{members}", value="")
+                            welcome_embed.set_thumbnail(
+                                url=member.avatar)
 
-            await welcomechannel.send(embed=welcome_embed)
+                await welcomechannel.send(embed=welcome_embed)
+                try:
+                    created = member.created_at
+                    created2 = time.mktime(created.timetuple())
+                    created3 = int(created2)
+                    embed = discord.Embed(
+                        title="User Beigetreten", color=0x0094ff, timestamp=datetime.datetime.now())
+                    embed.add_field(name="Created:",
+                                    value=f"<t:{str(created3)}:D>")
+                    embed.add_field(name="User ID:", value=member.id)
+                    embed.set_thumbnail(url=member.avatar)
+                    await logchannel.send(embed=embed)
+                except Exception as error:
+                    print(error)
+
+        except:
+            try:
+                await logchannel.send(content="Willkommensnachrichten nicht eingerichtet!")
+            except Exception as error:
+                print(error)
 
 
 async def setup(bot):

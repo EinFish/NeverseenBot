@@ -283,9 +283,10 @@ class BirthdayCog(commands.Cog):
 
     @tasks.loop(hours=1)
     async def birthdayloop(self):
+
         currenttime = datetime.datetime.fromtimestamp(
             int(time.time())).strftime('%H')
-        if currenttime == "16":  # Es ist 3 Uhr morgends
+        if currenttime == "8":  # Es ist 3 Uhr morgends
             try:
                 config = sjson  # config laden
                 for server in config:
@@ -335,7 +336,7 @@ class BirthdayCog(commands.Cog):
                         birthdayPings = ""
                         for member in birthdayMembers:
                             birthdayPings += f"{member.mention} "
-                        await channel.send(embed=discord.Embed(title="Herzlichen Glückwunsch!", description=f"{birthdayPings} {'Hat' if len(birthdayMembers) == 1 else 'Haben'} heute Geburtstag!!!", color=0xCB33F5), content=content)
+                        await channel.send(embed=discord.Embed(title="Herzlichen Glückwunsch!", description=f"{birthdayPings} {'Hat' if len(birthdayMembers) == 1 else 'Haben'} heute Geburtstag!!!", color=0x0094ff), content=content)
                     except:
                         pass
             except:
