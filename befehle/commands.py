@@ -25,6 +25,11 @@ class TicketButtons(discord.ui.Button):
         self.mode = mode
 
     async def callback(self, interaction: discord.Interaction):
+        with open("serverconfig.json") as file:
+            sjson = json.load(file)
+        guildid = interaction.guild.id
+        logchannelid = sjson[str(guildid)]["log"]
+        logchannel = await interaction.guild.fetch_channel(logchannelid)
         await interaction.response.defer()
 
         if self.mode == 0:
@@ -37,9 +42,23 @@ class TicketButtons(discord.ui.Button):
             content2 = content[0]
             content3 = content2[2:20]
             content4 = int(content3)
-            member = await interaction.channel.fetch_member(content4)
+            member = await interaction.guild.fetch_member(content4)
             await interaction.channel.remove_user(member)
 
+            try:
+                embed = discord.Embed(
+                    title="Ticket geschlossen", color=0x0094ff, timestamp=datetime.datetime.now())
+                embed.add_field(name="Ticket von::",
+                                value=f"{member.mention}")
+                embed.add_field(name="User ID:", value=member.id)
+                embed.add_field(
+                    name="Ticket:", value=interaction.channel.mention)
+                embed.add_field(name="Geschlossen von:",
+                                value=interaction.user.mention)
+                await logchannel.send(embed=embed)
+
+            except Exception as error:
+                print(error)
         if self.mode == 1:
             pass
 
@@ -79,6 +98,9 @@ class TicketModal(discord.ui.Modal):
     async def on_submit(self, interaction) -> None:
         with open("serverconfig.json") as file:
             sjson = json.load(file)
+        guildid = interaction.guild.id
+        logchannelid = sjson[str(guildid)]["log"]
+        logchannel = await interaction.guild.fetch_channel(logchannelid)
 
         guildid = interaction.guild.id
         mod = sjson[str(guildid)]["modrole"]
@@ -90,6 +112,20 @@ class TicketModal(discord.ui.Modal):
         embed = discord.Embed(color=0x0094ff, timestamp=datetime.datetime.now(), title=self.problem, description=interaction.user.mention +
                               " bitte beschreibe dein Problem näher. Es wird sich bald ein Team Mitglied um dein Problem kümmern.")
         await self.Thread.send(content=f"{self.person}, {mod}", embed=embed, view=TicketView2())
+
+        try:
+            member = interaction.user
+            embed = discord.Embed(
+                title="Ticket erstellt", color=0x0094ff, timestamp=datetime.datetime.now())
+            embed.add_field(name="Ticket von::",
+                            value=f"{member.mention}")
+            embed.add_field(name="User ID:", value=member.id)
+            embed.add_field(
+                name="Ticket:", value=self.Thread.mention)
+            await logchannel.send(embed=embed)
+
+        except Exception as error:
+            print(error)
 
 
 class TicketButton(discord.ui.Button):
@@ -114,7 +150,7 @@ class ModCommands(discord.app_commands.Group):
     async def ticket_channel(self, interaction, channel: discord.TextChannel, titel: str, text: str = ""):
         if interaction.user.guild_permissions.administrator:
             if text == "":
-                text = "Klicke auf den unteren Knopf um ein " + titel + " ticket zu erstellen."
+                text = "Klicke auf den unteren Knopf um ein " + titel + " Ticket zu erstellen."
             await interaction.response.defer()
             embed = discord.Embed(
                 title=titel, description=text, color=0x0094ff)
