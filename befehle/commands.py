@@ -163,6 +163,8 @@ class ModCommands(discord.app_commands.Group):
     @app_commands.command(name="view", description="Zeigt Informatione. eines Members")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def view(self, interaction, member: discord.Member):
+        with open("users.json") as file:
+            ujson = json.load(file)
         if interaction.user.guild_permissions.ban_members:
             id = member.id
             created = member.created_at
@@ -176,6 +178,11 @@ class ModCommands(discord.app_commands.Group):
             embed.add_field(name="ID:", value=id)
             embed.add_field(name="Created:", value=f"<t:{str(created3)}:D>")
             embed.add_field(name="Joined:", value=f"<t:{joined3}:R>")
+            try:
+                warns = ujson[str(id)]["warns"]
+                embed.add_field(name="Aktuelle Warnungen:", value=warns)
+            except KeyError:
+                embed.add_field(name="Aktuelle Warnungen:", value="0")
             embed.set_thumbnail(url=member.avatar)
 
             await interaction.response.send_message(embed=embed, ephemeral=True, view=ModViewView(member=member))
