@@ -21,14 +21,7 @@ class Automod(commands.Cog):
     async def on_ready(self):
         print("Listeners geladen!")
 
-    @commands.Cog.listener()
-    async def on_message(self, message):
-        if not message.author.bot:
-            if "test" in message.content.lower():
-                await message.reply(content="test bestanden")
-
-            if "xd" in message.content.lower():
-                await message.add_reaction(rjson["youtube"])
+    
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
