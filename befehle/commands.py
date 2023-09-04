@@ -10,15 +10,6 @@ import datetime
 import time
 from utils import ModViewView
 
-from discord.permissions import Permissions
-from discord.utils import MISSING
-
-
-with open("reactions.json") as file:
-    rjson = json.load(file)
-with open("config.json", "r") as file:
-    config = json.load(file)
-
 
 class TicketButtons(discord.ui.Button):
     def __init__(self, text, discordbuttonstyle, mode):

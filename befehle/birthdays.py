@@ -16,10 +16,6 @@ import utils
 errormessage = utils.ErrorMessage.errordcmessage
 
 
-with open('reactions.json') as file:
-    rjson = json.load(file)
-
-
 class BirthdayCommands(discord.app_commands.Group):
 
     @app_commands.command(name="add", description="Füge deinen Geburtstag ins Geburtstagssystem ein")

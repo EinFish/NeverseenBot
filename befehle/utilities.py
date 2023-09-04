@@ -4,13 +4,6 @@ from discord import app_commands, ui
 import json
 
 
-with open('config.json') as file:
-    config = json.load(file)
-
-with open("users.json") as file:
-    ujson = json.load(file)
-
-
 class bugReportModal(ui.Modal, title="Bugreport"):
     command = ui.TextInput(label="in welchem Befehl tritt der Bug auf?",
                            style=discord.TextStyle.short, placeholder="/fun twitch", required=True, max_length=255)
@@ -24,6 +17,8 @@ class bugReportModal(ui.Modal, title="Bugreport"):
                          style=discord.TextStyle.long, placeholder="", required=False, max_length=1024)
 
     async def on_submit(self, interaction) -> None:
+        with open('config.json') as file:
+            config = json.load(file)
         recivers = config["OWNER_ID"]
         for reciver in recivers:
             reciv = interaction.client.get_user(reciver)
@@ -38,6 +33,10 @@ class Utilities(discord.app_commands.Group):
     @app_commands.command(name="blacklist", description="blackliste einen user")
     @app_commands.checks.cooldown(1, 20)
     async def blacklist(self, interaction, user: discord.Member, blacklist: bool):
+        with open('config.json') as file:
+            config = json.load(file)
+        with open("users.json") as file:
+            ujson = json.load(file)
         if interaction.user.guild_permissions.administrator:
             userid = user.id
 
@@ -59,6 +58,8 @@ class Utilities(discord.app_commands.Group):
     @app_commands.command(name="bugreport", description="reporte einen Bug")
     @app_commands.checks.cooldown(1, 20)
     async def bugreport(self, ctx):
+        with open("users.json") as file:
+            ujson = json.load(file)
         if ujson[str(ctx.user.id)] != {"blacklist": True}:
             await ctx.response.send_modal(bugReportModal())
         else:

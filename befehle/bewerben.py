@@ -5,9 +5,6 @@ from discord.ext import commands
 import json
 from discord import app_commands
 
-with open("reactions.json") as file:
-    rjson = json.load(file)
-
 
 class BewerbenCog(commands.Cog):
 
@@ -20,6 +17,8 @@ class BewerbenCog(commands.Cog):
 
     @commands.command()
     async def bewerben(self, ctx, message: int):
+        with open("reactions.json") as file:
+            rjson = json.load(file)
         with open("serverconfig.json") as file:
             sjson = json.load(file)
         if ctx.author.guild_permissions.administrator:

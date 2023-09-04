@@ -5,15 +5,6 @@ from discord.ext import commands
 from discord import app_commands
 import json
 import datetime
-""" 
-with open("serverconfig.json") as file:
-    sjson = json.load(file) """
-
-with open("config.json") as file:
-    config = json.load(file)
-
-with open("reactions.json") as file:
-    rjson = json.load(file)
 
 
 class TicketModal(discord.ui.Modal):
@@ -309,6 +300,8 @@ class AdminCog(commands.Cog):
 
     @commands.command()
     async def sync(self, ctx) -> None:
+        with open("config.json") as file:
+            config = json.load(file)
         id = config["OWNER_ID"]
         # id2 = int(id)
         if ctx.author.id not in id:

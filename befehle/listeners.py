@@ -34,7 +34,7 @@ class Automod(commands.Cog):
     async def on_message_edit(self, before, after):
         with open("serverconfig.json") as file:
             sjson = json.load(file)
-        guildid = before.guild.id
+        guildid = after.guild.id
         if not before.author.bot:
             channel = after.guild.get_channel(
                 int(sjson[str(guildid)]["log"]))
