@@ -11,13 +11,10 @@ from discord import app_commands
 from discord.permissions import Permissions
 from discord.utils import MISSING
 import time
+import utils
 
+errormessage = utils.ErrorMessage.errordcmessage
 
-with open("serverconfig.json") as file:
-    sjson = json.load(file)
-
-with open("users.json") as file:
-    bjson = json.load(file)
 
 with open('reactions.json') as file:
     rjson = json.load(file)
@@ -28,8 +25,15 @@ class BirthdayCommands(discord.app_commands.Group):
     @app_commands.command(name="add", description="Füge deinen Geburtstag ins Geburtstagssystem ein")
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def badd(self, interaction, tag: app_commands.Range[int, 1, 31], monat: app_commands.Range[int, 1, 12], jahr: app_commands.Range[int, 1960, 2020] = 1600):
+        with open("users.json") as file:
+            bjson = json.load(file)
         await interaction.response.defer()
         userid = interaction.user.id
+
+        try:
+            warns = bjson[str(userid)]["warns"]
+        except KeyError:
+            warns = 0
         try:
 
             daten = ""
@@ -39,7 +43,7 @@ class BirthdayCommands(discord.app_commands.Group):
                 date2 = str(date)
                 daten = date2.split("-")
                 bday = date.strftime("%d/%m/%Y")
-                bjson[str(userid)] = {"bday": bday}
+                bjson[str(userid)] = {"bday": bday, "warns": warns}
 
             else:
                 today = datetime.date.today()
@@ -47,7 +51,7 @@ class BirthdayCommands(discord.app_commands.Group):
                 date2 = str(date)
                 daten = date2.split("-")
                 bday = date.strftime("%d/%m/Y")
-                bjson[str(userid)] = {"bday": bday}
+                bjson[str(userid)] = {"bday": bday, "warns": warns}
 
             with open("users.json", 'w') as json_file:
                 json.dump(bjson, json_file, indent=4)
@@ -62,12 +66,15 @@ class BirthdayCommands(discord.app_commands.Group):
             await interaction.followup.send(embed=embed)
         except ValueError:
             await interaction.followup.send(content="Bitte gebe ein richtiges Datum ein.")
-        except:
-            raise
+        except Exception as error:
+            await errormessage(interaction=interaction, error=error)
 
     @app_commands.command(name="show", description="Zeigt den Geburtstag von einem Member")
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def bshow(self, interaction, member: discord.Member = None):
+        with open("users.json") as file:
+            bjson = json.load(file)
+
         await interaction.response.defer()
 
         try:
@@ -122,6 +129,8 @@ class BirthdayCommands(discord.app_commands.Group):
     @app_commands.command(name="delete", description="Löscht den Geburtstag von einem Member")
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def bdelete(self, interaction, member: discord.Member = None):
+        with open("users.json") as file:
+            bjson = json.load(file)
 
         try:
             await interaction.response.defer()
@@ -167,6 +176,8 @@ class BirthdayCommands(discord.app_commands.Group):
     @app_commands.command(name="next", description="Zeigt die nächsten Geburtstage an")
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def birthday(self, ctx):
+        with open("users.json") as file:
+            bjson = json.load(file)
         await ctx.response.defer()
 
         def divideListInChunks(list, chunkSize):
@@ -283,6 +294,11 @@ class BirthdayCog(commands.Cog):
 
     @tasks.loop(hours=1)
     async def birthdayloop(self):
+        with open("serverconfig.json") as file:
+            sjson = json.load(file)
+
+        with open("users.json") as file:
+            bjson = json.load(file)
 
         currenttime = datetime.datetime.fromtimestamp(
             int(time.time())).strftime('%H')

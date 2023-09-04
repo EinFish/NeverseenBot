@@ -10,6 +10,61 @@ class ErrorMessage():
         await interaction.response.send_message(content=f"Ein Error!\n\n```txt\n{error}```\nReporte bitte diesen Error mit `/utility bugreport`", ephemeral=True)
 
 
+class WarnModal(discord.ui.Modal):
+    def __init__(self, member):
+        self.member = member
+        super().__init__(title="Warnen:")
+    grund = discord.ui.TextInput(label="Grund", placeholder="Gebe bitte einen Grund für das Warnen an",
+                                 required=True, style=discord.TextStyle.short, max_length=100, min_length=5)
+
+    async def on_submit(self, interaction) -> None:
+        with open("users.json") as file:
+            ujson = json.load(file)
+
+        with open("serverconfig.json") as file:
+            sjson = json.load(file)
+
+        if interaction.user.guild_permissions.kick_members:
+            try:
+                warns = ujson[str(self.member.id)]["warns"]
+            except:
+                warns = 0
+            ujson[str(self.member.id)] = {"warns": warns + 1}
+
+            with open("users.json", "w") as json_file:
+                json.dump(ujson, json_file, indent=4)
+
+            try:
+                guildid = interaction.guild.id
+                dm = discord.Embed(
+                    title="Du wurdest gewarnt!", timestamp=datetime.datetime.now(), color=0x0094ff)
+                dm.add_field(name="Grund:", value=self.grund)
+                dm.add_field(name="Server:", value=interaction.guild.name)
+                await self.member.send(embed=dm)
+
+                embed = discord.Embed(
+                    title=f"{self.member.display_name} wurde Gewarnt.", timestamp=datetime.datetime.now(), color=0x0094ff)
+                embed.add_field(name="Aktuelle Warnungen:",
+                                value=warns + 1)
+                embed.set_thumbnail(url=self.member.avatar)
+                if self.grund != None:
+                    embed.add_field(name="Grund:", value=self.grund)
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+
+                log = discord.Embed(
+                    title="User Gewarnt", description=f"Der User {self.member.mention} wurde von {interaction.user.mention} gewarnt.", timestamp=datetime.datetime.now(), color=0x0094ff)
+                log.add_field(name="Grund", value=self.grund)
+                try:
+                    logchannelid = sjson[str(guildid)]["log"]
+                    logchannel = await self.member.guild.fetch_channel(logchannelid)
+                    await logchannel.send(embed=log)
+                except KeyError:
+                    pass
+
+            except discord.Forbidden:
+                await interaction.response.send_message(content=f"Warnen Fehlgeschlagen. Der User {self.member.mention} hat `Direktnachrichten von Servermitgliedern` Ausgeschaltet.", ephemeral=True)
+
+
 class ModButton(discord.ui.Button):
     def __init__(self, text, discordbuttonstyle, mode, member):
         super().__init__(label=text, style=discordbuttonstyle)
@@ -85,7 +140,11 @@ class ModButton(discord.ui.Button):
                 await interaction.response.send_message(content=f"Du hast keine Berechtigung dafür.", ephemeral=True)
 
         if self.mode == 3:
-            print("3")
+            if interaction.user.guild_permissions.moderate_members:
+                await interaction.response.send_modal(WarnModal(member=member))
+                print("3")
+            else:
+                await interaction.send_message(content="Dir fehlen Berechtigungen.")
 
 
 class ModViewView(discord.ui.View):

@@ -178,11 +178,59 @@ class ModCommands(discord.app_commands.Group):
             embed.add_field(name="Joined:", value=f"<t:{joined3}:R>")
             embed.set_thumbnail(url=member.avatar)
 
-            # View (Buttons) hinzufügen
             await interaction.response.send_message(embed=embed, ephemeral=True, view=ModViewView(member=member))
 
         else:
             await interaction.response.send_message(content=f"Du hast keine Berechtigung dafür.", ephemeral=True)
+
+    @app_commands.command(name="warn", description="Warne einen user.")
+    @commands.cooldown(1, 20)
+    async def warn(self, interaction, member: discord.User, grund: str):
+        with open("users.json") as file:
+            ujson = json.load(file)
+
+        with open("serverconfig.json") as file:
+            sjson = json.load(file)
+
+        if interaction.user.guild_permissions.kick_members:
+            try:
+                warns = ujson[str(member.id)]["warns"]
+            except:
+                warns = 0
+            ujson[str(member.id)] = {"warns": warns + 1}
+
+            with open("users.json", "w") as json_file:
+                json.dump(ujson, json_file, indent=4)
+
+            try:
+                guildid = interaction.guild.id
+                dm = discord.Embed(
+                    title="Du wurdest gewarnt!", timestamp=datetime.datetime.now(), color=0x0094ff)
+                dm.add_field(name="Grund:", value=grund)
+                dm.add_field(name="Server:", value=interaction.guild.name)
+                await member.send(embed=dm)
+
+                embed = discord.Embed(
+                    title=f"{member.display_name} wurde Gewarnt.", timestamp=datetime.datetime.now(), color=0x0094ff)
+                embed.add_field(name="Aktuelle Warnungen:",
+                                value=warns + 1)
+                embed.set_thumbnail(url=member.avatar)
+                if grund != None:
+                    embed.add_field(name="Grund:", value=grund)
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+
+                log = discord.Embed(
+                    title="User Gewarnt", description=f"Der User {member.mention} wurde von {interaction.user.mention} gewarnt.", timestamp=datetime.datetime.now(), color=0x0094ff)
+                log.add_field(name="Grund", value=grund)
+                try:
+                    logchannelid = sjson[str(guildid)]["log"]
+                    logchannel = await member.guild.fetch_channel(logchannelid)
+                    await logchannel.send(embed=log)
+                except KeyError:
+                    pass
+
+            except discord.Forbidden:
+                await interaction.response.send_message(content=f"Warnen Fehlgeschlagen. Der User {member.mention} hat `Direktnachrichten von Servermitgliedern` Ausgeschaltet.", ephemeral=True)
 
     @app_commands.command(name="kick", description="Kicke einen Member")
     @commands.cooldown(1, 10, commands.BucketType.user)
