@@ -8,6 +8,7 @@ from discord.ext import commands
 from discord import app_commands
 import datetime
 import time
+from utils import ModViewView
 
 from discord.permissions import Permissions
 from discord.utils import MISSING
@@ -176,10 +177,9 @@ class ModCommands(discord.app_commands.Group):
             embed.add_field(name="Created:", value=f"<t:{str(created3)}:D>")
             embed.add_field(name="Joined:", value=f"<t:{joined3}:R>")
             embed.set_thumbnail(url=member.avatar)
-            # embed.image(member.avatar)
 
             # View (Buttons) hinzufügen
-            await interaction.response.send_message(embed=embed, ephemeral=True)
+            await interaction.response.send_message(embed=embed, ephemeral=True, view=ModViewView(member=member))
 
         else:
             await interaction.response.send_message(content=f"Du hast keine Berechtigung dafür.", ephemeral=True)
@@ -190,7 +190,7 @@ class ModCommands(discord.app_commands.Group):
         with open("serverconfig.json") as file:
             sjson = json.load(file)
 
-        if interaction.user.guild_permissions.administrator:
+        if interaction.user.guild_permissions.kick_members:
             guildid = interaction.guild.id
             channel = interaction.guild.get_channel(
                 int(sjson[str(guildid)]["log"]))
@@ -215,7 +215,7 @@ class ModCommands(discord.app_commands.Group):
         guildid = interaction.guild.id
         channel = interaction.guild.get_channel(
             int(sjson[str(guildid)]["log"]))
-        if interaction.user.guild_permissions.administrator:
+        if interaction.user.guild_permissions.ban_members:
             await interaction.response.send_message(content=f"Du hast {user.mention} erfolgreich gebannt", ephemeral=True)
             await user.ban(reason=reason)
 
@@ -236,7 +236,7 @@ class ModCommands(discord.app_commands.Group):
             sjson = json.load(file)
 
         guildid = interaction.guild.id
-        if interaction.user.guild_permissions.administrator:
+        if interaction.user.guild_permissions.ban_members:
             channel = interaction.guild.get_channel(
                 int(sjson[str(guildid)]["log"]))
             await interaction.guild.unban(user, reason=reason)
@@ -289,7 +289,7 @@ class ModCommands(discord.app_commands.Group):
         guildid = interaction.guild.id
         channel = interaction.guild.get_channel(
             int(sjson[str(guildid)]["log"]))
-        if interaction.user.guild_permissions.administrator:
+        if interaction.user.guild_permissions.moderate_members:
             duration = None
             await interaction.response.send_message(content="Du hast das Timeout  von " + member.mention + " aufgehoben", ephemeral=True)
             await member.timeout(duration, reason=reason)
