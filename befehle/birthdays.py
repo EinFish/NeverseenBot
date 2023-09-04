@@ -185,7 +185,9 @@ class BirthdayCommands(discord.app_commands.Group):
 
         jsonData = bjson  # Daten aus JSON laden
 
-        users = list(jsonData)  # Ein Array mit UserIDs aus der JSON machen
+        users = list(jsonData)
+        print(users)  # Ein Array mit UserIDs aus der JSON machen
+        print(jsonData[users[0]])
 
         maxBDaysPerPage = 10  # Die Maximalen Geburtstage die pro Seite angezeigt werden sollen
 
@@ -198,32 +200,38 @@ class BirthdayCommands(discord.app_commands.Group):
         parsedBirthdays = []  # Geburtstage als ein bestimmtes Format
 
         for user in users:
-            if int(user) in memberlist:  # ids sind strings, deshalb in int umwandeln
-                mention = f"<@{user}>"
-                birthday = jsonData[user]["bday"]
-                day = birthday.split("/")[0]
-                month = birthday.split("/")[1]
-                rawYear = birthday.split("/")[2]
-                if int(month) > int(monthtoday):  # Monat war noch nicht -> Geburtstag war noch nicht
-                    year = int(yeartoday)
-                # Monat ist heute aber Tag war noch nicht -> Geburtstag war noch nicht
-                elif int(month) == int(monthtoday) and int(day) >= int(daytoday):
-                    year = int(yeartoday)
-                else:  # Geburtstag war schon
-                    year = int(yeartoday) + 1
+            try:
+                if int(user) in memberlist:  # ids sind strings, deshalb in int umwandeln
+                    mention = f"<@{user}>"
+                    print(jsonData[user])
+                    birthday = jsonData[user]["bday"]
+                    day = birthday.split("/")[0]
+                    month = birthday.split("/")[1]
+                    rawYear = birthday.split("/")[2]
+                    # Monat war noch nicht -> Geburtstag war noch nicht
+                    if int(month) > int(monthtoday):
+                        year = int(yeartoday)
+                    # Monat ist heute aber Tag war noch nicht -> Geburtstag war noch nicht
+                    elif int(month) == int(monthtoday) and int(day) >= int(daytoday):
+                        year = int(yeartoday)
+                    else:  # Geburtstag war schon
+                        year = int(yeartoday) + 1
 
-                date_obj = datetime.datetime.strptime(
-                    f"{month}-{day}-{year}", "%m-%d-%Y")
+                    date_obj = datetime.datetime.strptime(
+                        f"{month}-{day}-{year}", "%m-%d-%Y")
 
-                birthdayParsed = {}
-                birthdayParsed["inDays"] = (
-                    date_obj - datetime.datetime.now()).days
-                birthdayParsed["showAge"] = rawYear != "1600"
-                birthdayParsed["newAge"] = year - int(rawYear)
-                birthdayParsed["user"] = user
-                birthdayParsed["timestamp"] = int(time.time(
-                )) + birthdayParsed["inDays"] * 86400 + 86400  # Für discord time formating
-                parsedBirthdays.append(birthdayParsed)
+                    birthdayParsed = {}
+                    birthdayParsed["inDays"] = (
+                        date_obj - datetime.datetime.now()).days
+                    birthdayParsed["showAge"] = rawYear != "1600"
+                    birthdayParsed["newAge"] = year - int(rawYear)
+                    birthdayParsed["user"] = user
+                    birthdayParsed["timestamp"] = int(time.time(
+                    )) + birthdayParsed["inDays"] * 86400 + 86400  # Für discord time formating
+                    parsedBirthdays.append(birthdayParsed)
+
+            except KeyError:
+                pass
 
         sortedBirthdays = sorted(parsedBirthdays, key=lambda x: x['inDays'])
 

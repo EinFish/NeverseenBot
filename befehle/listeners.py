@@ -21,8 +21,6 @@ class Automod(commands.Cog):
     async def on_ready(self):
         print("Listeners geladen!")
 
-    
-
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         with open("serverconfig.json") as file:
@@ -49,7 +47,7 @@ class Automod(commands.Cog):
 
         guildid = message.guild.id
         channel = message.guild.get_channel(
-            int(sjson[str(guildid)]["log"]))
+            int(sjson[str(guildid)]["logchannel"]))
         embed = discord.Embed(title="Nachricht gelöscht",
                               description=f"eine nachricht von {message.author.mention} wurde von {user.mention} Gelöscht", color=0x0094ff, timestamp=datetime.datetime.now())
         embed.add_field(name="Nachricht:", value=message.content, inline=True)
