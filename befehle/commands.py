@@ -143,10 +143,10 @@ class ModCommands(discord.app_commands.Group):
         if interaction.user.guild_permissions.administrator:
             if text == "":
                 text = "Klicke auf den unteren Knopf um ein " + titel + " Ticket zu erstellen."
-            await interaction.response.defer()
+
             embed = discord.Embed(
                 title=titel, description=text, color=0x0094ff)
-            await interaction.followup.send(content="erstellt", ephemeral=True)
+            await interaction.response.send_message(content="erstellt", ephemeral=True)
             await channel.send(embed=embed, view=TicketView())
         else:
             await interaction.response.send_message(content=f"Du hast keine Berechtigung dafür.", ephemeral=True)
