@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
 @bot.event
 async def on_ready():
-    print("Bot ist ready!")
+    print("Bot is ready!")
     c = 1
     while (True):
         if (c == 1):
