@@ -12,8 +12,6 @@ with open("reactions.json") as file:
 
 
 class Automod(commands.Cog):
-    banned_words = ["hs", "Hurensohn", "töst"]
-
     def __init__(self, bot):
         self.bot = bot
 
@@ -27,33 +25,39 @@ class Automod(commands.Cog):
             sjson = json.load(file)
         guildid = after.guild.id
         if not before.author.bot:
-            channel = after.guild.get_channel(
-                int(sjson[str(guildid)]["log"]))
-            embed = discord.Embed(title="Nachricht bearbeitet", description="eine nachricht von " +
-                                  before.author.name + " wurde bearbeitet.", color=0x0094ff, timestamp=datetime.datetime.now())
-            embed.add_field(name="Vorher:", value=before.content, inline=True)
-            embed.add_field(name="Nachher:", value=after.content, inline=True)
-            embed.add_field(name="Channel:", value=after.jump_url, inline=True)
-            await channel.send(embed=embed)
+            try:
+                channel = after.guild.get_channel(
+                    int(sjson[str(guildid)]["logchannel"]))
+                embed = discord.Embed(title="Nachricht bearbeitet", description="eine nachricht von " +
+                                      before.author.name + " wurde bearbeitet.", color=0x0094ff, timestamp=datetime.datetime.now())
+                embed.add_field(
+                    name="Vorher:", value=before.content, inline=True)
+                embed.add_field(name="Nachher:",
+                                value=after.content, inline=True)
+                embed.add_field(name="Channel:",
+                                value=after.jump_url, inline=True)
+                await channel.send(embed=embed)
+            except KeyError:
+                pass
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
         with open("serverconfig.json") as file:
             sjson = json.load(file)
 
-        guild = message.guild
-        async for bot_entry in guild.audit_logs(action=discord.AuditLogAction.message_delete, limit=1):
-            user = bot_entry.user
-
         guildid = message.guild.id
-        channel = message.guild.get_channel(
-            int(sjson[str(guildid)]["logchannel"]))
-        embed = discord.Embed(title="Nachricht gelöscht",
-                              description=f"eine nachricht von {message.author.mention} wurde von {user.mention} Gelöscht", color=0x0094ff, timestamp=datetime.datetime.now())
-        embed.add_field(name="Nachricht:", value=message.content, inline=True)
-        embed.add_field(name="Channel:",
-                        value=message.channel.jump_url, inline=True)
-        await channel.send(embed=embed)
+        try:
+            channel = message.guild.get_channel(
+                int(sjson[str(guildid)]["logchannel"]))
+            embed = discord.Embed(title="Nachricht gelöscht",
+                                  description=f"eine nachricht von {message.author.mention} wurde Gelöscht", color=0x0094ff, timestamp=datetime.datetime.now())
+            embed.add_field(name="Nachricht:",
+                            value=message.content, inline=True)
+            embed.add_field(name="Channel:",
+                            value=message.channel.jump_url, inline=True)
+            await channel.send(embed=embed)
+        except KeyError:
+            pass
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
@@ -75,27 +79,22 @@ class Automod(commands.Cog):
             sjson = json.load(file)
 
         guildid = member.guild.id
-        logchannelid = sjson[str(guildid)]["log"]
-        logchannel = await member.guild.fetch_channel(logchannelid)
 
         try:
-
-            try:
-                created = member.created_at
-                created2 = time.mktime(created.timetuple())
-                created3 = int(created2)
-                embed = discord.Embed(
-                    title="User Verlassen", color=0x0094ff, timestamp=datetime.datetime.now())
-                embed.add_field(name="Created:",
-                                value=f"<t:{str(created3)}:D>")
-                embed.add_field(name="User ID:", value=member.id)
-                embed.set_thumbnail(url=member.avatar)
-                await logchannel.send(embed=embed)
-            except Exception as error:
-                print(error)
-
-        except Exception as error:
-            print(error)
+            logchannelid = sjson[str(guildid)]["log"]
+            logchannel = await member.guild.fetch_channel(logchannelid)
+            created = member.created_at
+            created2 = time.mktime(created.timetuple())
+            created3 = int(created2)
+            embed = discord.Embed(
+                title="User Verlassen", color=0x0094ff, timestamp=datetime.datetime.now())
+            embed.add_field(name="Created:",
+                            value=f"<t:{str(created3)}:D>")
+            embed.add_field(name="User ID:", value=member.id)
+            embed.set_thumbnail(url=member.avatar)
+            await logchannel.send(embed=embed)
+        except KeyError:
+            pass
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -114,8 +113,11 @@ class Automod(commands.Cog):
         with open("serverconfig.json") as file:
             sjson = json.load(file)
         guildid = member.guild.id
-        logchannelid = sjson[str(guildid)]["log"]
-        logchannel = await member.guild.fetch_channel(logchannelid)
+        try:
+            logchannelid = sjson[str(guildid)]["log"]
+            logchannel = await member.guild.fetch_channel(logchannelid)
+        except KeyError:
+            pass
 
         try:
 
@@ -255,8 +257,8 @@ class Automod(commands.Cog):
         except:
             try:
                 await logchannel.send(content="Willkommensnachrichten nicht eingerichtet!")
-            except Exception as error:
-                print(error)
+            except:
+                pass
 
 
 async def setup(bot):

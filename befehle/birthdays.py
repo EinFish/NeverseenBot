@@ -54,10 +54,10 @@ class BirthdayCommands(discord.app_commands.Group):
 
             if jahr == 1600:
                 embed = discord.Embed(title="Geburtstag eingetragen!",
-                                      description=f"Dein geburtstag wurde erfolgreich auf den `{daten[2]}.{daten[1]}.` gesetzt.", timestamp=datetime.datetime.now(), color=0x0094ff)
+                                      description=f"Dein Geburtstag wurde erfolgreich auf den `{daten[2]}.{daten[1]}.` gesetzt.", timestamp=datetime.datetime.now(), color=0x0094ff)
             else:
                 embed = discord.Embed(title="Geburtstag eingetragen!",
-                                      description=f"Dein geburtstag wurde erfolgreich auf den `{daten[2]}.{daten[1]}.{daten[0]}` gesetzt.", timestamp=datetime.datetime.now(), color=0x0094ff)
+                                      description=f"Dein Geburtstag wurde erfolgreich auf den `{daten[2]}.{daten[1]}.{daten[0]}` gesetzt.", timestamp=datetime.datetime.now(), color=0x0094ff)
 
             await interaction.followup.send(embed=embed)
         except ValueError:
@@ -91,34 +91,34 @@ class BirthdayCommands(discord.app_commands.Group):
             if member != None:
                 if bdaylist[2] == "1600":
                     embed = discord.Embed(
-                        title=f"Geburtstag von {user1.display_name}", description=f"Der User {user1.mention} hat am `{bdaylist[0]}.{bdaylist[1]}` geburtstag.", timestamp=datetime.datetime.now(), color=0x0094ff)
+                        title=f"Geburtstag von {user1.display_name}", description=f"Der User {user1.mention} hat am `{bdaylist[0]}.{bdaylist[1]}` Geburtstag.", timestamp=datetime.datetime.now(), color=0x0094ff)
                     await interaction.followup.send(embed=embed)
                 else:
                     embed = discord.Embed(
-                        title=f"Geburtstag von {user1.display_name}", description=f"Der User {user1.mention} hat am `{bdaylist[0]}.{bdaylist[1]}` geburtstag und ist im Jahr `{bdaylist[2]}` geboren.", timestamp=datetime.datetime.now(), color=0x0094ff)
+                        title=f"Geburtstag von {user1.display_name}", description=f"Der User {user1.mention} hat am `{bdaylist[0]}.{bdaylist[1]}` Geburtstag und ist im Jahr `{bdaylist[2]}` geboren.", timestamp=datetime.datetime.now(), color=0x0094ff)
                     await interaction.followup.send(embed=embed)
 
             else:
                 if bdaylist[2] == "1600":
                     embed = discord.Embed(
-                        title=f"Geburtstag von {user1.display_name}", description=f"Du hast am `{bdaylist[0]}.{bdaylist[1]}` geburtstag ", timestamp=datetime.datetime.now(), color=0x0094ff)
+                        title=f"Geburtstag von {user1.display_name}", description=f"Du hast am `{bdaylist[0]}.{bdaylist[1]}` Geburtstag.", timestamp=datetime.datetime.now(), color=0x0094ff)
                     await interaction.followup.send(embed=embed)
                 else:
                     embed = discord.Embed(
-                        title=f"Geburtstag von {user1.display_name}", description=f"Du hast am `{bdaylist[0]}.{bdaylist[1]}` geburtstag und bist im Jahr `{bdaylist[2]}` geboren.", timestamp=datetime.datetime.now(), color=0x0094ff)
+                        title=f"Geburtstag von {user1.display_name}", description=f"Du hast am `{bdaylist[0]}.{bdaylist[1]}` Geburtstag und bist im Jahr `{bdaylist[2]}` geboren.", timestamp=datetime.datetime.now(), color=0x0094ff)
                     await interaction.followup.send(embed=embed)
         except KeyError:
             if member == None:
                 embed = discord.Embed(
-                    title=f"Fehler", description=f"Es gab einen Fehler beim Anzeigen des Geburtstages von {interaction.user.mention}", color=0x0094ff, timestamp=datetime.datetime.now())
+                    title=f"Fehler", description=f"Es gab einen Fehler beim Anzeigen des Geburtstages von {interaction.user.mention}.", color=0x0094ff, timestamp=datetime.datetime.now())
                 embed.add_field(
-                    name="Grund:", value=f"{interaction.user.mention} hat keinen Geburtstag eingetragen")
+                    name="Grund:", value=f"{interaction.user.mention} hat keinen Geburtstag eingetragen.")
 
             if member != None:
                 embed = discord.Embed(
-                    title=f"Fehler", description=f"Es gab einen Fehler beim Anzeigen des Geburtstages von {member.mention}", color=0x0094ff, timestamp=datetime.datetime.now())
+                    title=f"Fehler", description=f"Es gab einen Fehler beim Anzeigen des Geburtstages von {member.mention}.", color=0x0094ff, timestamp=datetime.datetime.now())
                 embed.add_field(
-                    name="Grund:", value=f"{member.mention} hat keinen Geburtstag eingetragen")
+                    name="Grund:", value=f"{member.mention} hat keinen Geburtstag eingetragen.")
 
             await interaction.followup.send(embed=embed)
 
@@ -137,7 +137,7 @@ class BirthdayCommands(discord.app_commands.Group):
                 userid = str(member.id)
                 if interaction.user.guild_permissions.kick_members:
                     id3 = str(userid)
-                    del bjson[id3]
+                    del bjson[id3]["bday"]
                     embed = discord.Embed(title=f"Geburtstag von {member.display_name} gelöscht",
                                           description=f"Der Geburtstag von {member.display_name} wurde gelöscht.", timestamp=datetime.datetime.now(), color=0x0094ff)
                     await interaction.followup.send(embed=embed)
@@ -145,7 +145,7 @@ class BirthdayCommands(discord.app_commands.Group):
                 else:
                     await interaction.followup.send(content=f"Du hast keine Berechtigung, andere Geburtsdaten zu löschen.", ephemeral=True)
             else:
-                del bjson[id2]
+                del bjson[id2]["bday"]
                 embed = discord.Embed(title=f"Geburtstag gelöscht", description=f"Du hast deinen Geburtstag gelöscht.",
                                       timestamp=datetime.datetime.now(), color=0x0094ff)
 
@@ -185,10 +185,7 @@ class BirthdayCommands(discord.app_commands.Group):
 
         jsonData = bjson  # Daten aus JSON laden
 
-        users = list(jsonData)
-        print(users)  # Ein Array mit UserIDs aus der JSON machen
-        print(jsonData[users[0]])
-
+        users = list(jsonData)  # Ein Array mit UserIDs aus der JSON machen
         maxBDaysPerPage = 10  # Die Maximalen Geburtstage die pro Seite angezeigt werden sollen
 
         currentPage = 0  # Die Aktuelle Seite
@@ -203,7 +200,6 @@ class BirthdayCommands(discord.app_commands.Group):
             try:
                 if int(user) in memberlist:  # ids sind strings, deshalb in int umwandeln
                     mention = f"<@{user}>"
-                    print(jsonData[user])
                     birthday = jsonData[user]["bday"]
                     day = birthday.split("/")[0]
                     month = birthday.split("/")[1]
