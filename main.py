@@ -8,6 +8,7 @@ from discord.ext import commands
 with open("config.json", "r") as file:
     config = json.load(file)
 
+
 bot = commands.Bot("neverseen.", intents=discord.Intents.all(),
                    application_id=config["APP_ID"])
 
@@ -27,7 +28,7 @@ if __name__ == "__main__":
 
 @bot.event
 async def on_ready():
-    print("Bot is ready!")
+    
     c = 1
     while (True):
         if (c == 1):
@@ -50,5 +51,6 @@ async def on_ready():
             c = 1
         await asyncio.sleep(30 * 10)
 
-
+print("Bot is ready!")
 bot.run(config["TOKEN"])
+
