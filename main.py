@@ -34,7 +34,7 @@ async def on_ready():
             await bot.change_presence(activity=discord.Game(name="die Konsole durch"))
 
         elif (c == 2):
-            await bot.change_presence(activity=discord.Streaming(name="Neverseen Minecraft", url="twitch.tv/neverseen_minecraft"))
+            await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="dir über die Schulter"))
 
         elif (c == 3):
             await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="guter Musik"))
@@ -43,12 +43,12 @@ async def on_ready():
             await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="dem Chat zu"))
 
         elif (c == 5):
-            await bot.change_presence(activity=discord.Streaming(name="omg", url=config["TWITCH_URL"]))
+            await bot.change_presence(activity=discord.Streaming(name="Neverseen_Minecraft", url=config["TWITCH_URL"]))
 
         c += 1
         if (c > 5):
             c = 1
-        await asyncio.sleep(30)
+        await asyncio.sleep(30 * 10)
 
 
 bot.run(config["TOKEN"])
