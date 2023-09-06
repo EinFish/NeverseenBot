@@ -97,7 +97,7 @@ class AdminCommands(discord.app_commands.Group):
             if bewerbungschannel != None:
                 sjson[str(guildid)]["bewerben"] = bewerbungschannel.id
             if logchannel != None:
-                sjson[str(guildid)]["log"] = logchannel.id
+                sjson[str(guildid)]["logchannel"] = logchannel.id
             if welcomechannel != "None":
                 sjson[str(guildid)]["welcome"] = {"channel": welcomechannel.id}
                 bdchannelcheck = True
