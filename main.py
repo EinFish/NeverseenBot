@@ -28,29 +28,35 @@ if __name__ == "__main__":
 
 @bot.event
 async def on_ready():
-    
+    print("Bot is running!")
     c = 1
     while (True):
         if (c == 1):
             await bot.change_presence(activity=discord.Game(name="die Konsole durch"))
 
         elif (c == 2):
-            await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="dir über die Schulter"))
+            await bot.change_presence(activity=discord.Game(name="bald Musik"))
 
         elif (c == 3):
-            await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="guter Musik"))
+            await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="dir über die Schulter"))
 
         elif (c == 4):
-            await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="dem Chat zu"))
+            await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="guter Musik"))
 
         elif (c == 5):
+            await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="dem Chat zu"))
+
+        elif (c == 6):
+            await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="dir über die Schulter"))
+
+        elif (c == 7):
             await bot.change_presence(activity=discord.Streaming(name="Neverseen_Minecraft", url=config["TWITCH_URL"]))
 
         c += 1
-        if (c > 5):
+        if (c > 7):
             c = 1
         await asyncio.sleep(30 * 10)
 
-print("Bot is ready!")
+
 bot.run(config["TOKEN"])
 
