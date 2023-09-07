@@ -81,7 +81,7 @@ class Automod(commands.Cog):
         guildid = member.guild.id
 
         try:
-            logchannelid = sjson[str(guildid)]["log"]
+            logchannelid = sjson[str(guildid)]["logchannel"]
             logchannel = await member.guild.fetch_channel(logchannelid)
             created = member.created_at
             created2 = time.mktime(created.timetuple())
@@ -114,7 +114,7 @@ class Automod(commands.Cog):
             sjson = json.load(file)
         guildid = member.guild.id
         try:
-            logchannelid = sjson[str(guildid)]["log"]
+            logchannelid = sjson[str(guildid)]["logchannel"]
             logchannel = await member.guild.fetch_channel(logchannelid)
         except KeyError:
             pass
@@ -241,6 +241,8 @@ class Automod(commands.Cog):
 
                 await welcomechannel.send(embed=welcome_embed)
                 try:
+                    logchannelid = sjson[str(guildid)]["logchannel"]
+                    logchannel = await member.guild.fetch_channel(logchannelid)
                     created = member.created_at
                     created2 = time.mktime(created.timetuple())
                     created3 = int(created2)
