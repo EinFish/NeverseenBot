@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands, ui
 import json
+from utils import EmbedBuilder
 
 
 class bugReportModal(ui.Modal, title="Bugreport"):
@@ -64,6 +65,13 @@ class Utilities(discord.app_commands.Group):
             await ctx.response.send_modal(bugReportModal())
         else:
             await ctx.response.send_message("Du bist auf der Blacklist.", ephemeral=True)
+
+    @app_commands.command(name="embed-builder", description="Erstelle ein Embed")
+    async def eb(self, interaction, channel: discord.TextChannel, timestamp: bool = False):
+        if interaction.user.guild_permissions.manage_roles:
+            await interaction.response.send_modal(EmbedBuilder(channel=channel, timestamp=timestamp))
+        else:
+            await interaction.response.send_message(content="Du hast keine Berechtigung dafür.", ephemeral=True)
 
 
 class UtilitiesCog(commands.Cog):

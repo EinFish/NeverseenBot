@@ -159,3 +159,63 @@ class ModViewView(discord.ui.View):
             ModButton("Muten (3h)", discord.ButtonStyle.secondary, 2, self.member))
         self.add_item(
             ModButton("Warnen", discord.ButtonStyle.danger, 3, self.member))
+
+
+class EmbedBuilderButton(discord.ui.Button):
+    def __init__(self, text, discordbuttonstyle, mode, channel, embed, timestamp):
+        super().__init__(label=text, style=discordbuttonstyle)
+        self.mode = mode
+        self.channel = channel
+        self.embed = embed
+        self.timestamp = timestamp
+
+    async def callback(self, interaction: discord.Interaction):
+        channel = self.channel
+        embed = self.embed
+        if self.mode == 0:
+            await channel.send(embed=embed)
+            await interaction.response.send_message(content="Embed versendet.", ephemeral=True)
+
+        if self.mode == 1:
+            await interaction.response.send_modal(EmbedBuilder(channel=channel, timestamp=self.timestamp))
+
+
+class EmbedBuilderView(discord.ui.View):
+    def __init__(self, channel, embed, timestamp):
+        self.channel = channel
+        self.embed = embed
+        self.timestamp = timestamp
+        super().__init__(timeout=None)
+        self.add_item(EmbedBuilderButton(
+            "Passt so", discord.ButtonStyle.success, 0, channel=channel, embed=embed, timestamp=timestamp))
+        self.add_item(EmbedBuilderButton(
+            "Nein", discord.ButtonStyle.danger, 1, channel=channel, embed=embed, timestamp=timestamp))
+
+
+class EmbedBuilder(discord.ui.Modal):
+    def __init__(self, channel, timestamp) -> None:
+        self.channel = channel
+        self.timestamp = timestamp
+        super().__init__(title="Embed Builder")
+    titel = discord.ui.TextInput(
+        label="Titel:", placeholder="Setzte einen Titel", style=discord.TextStyle.short)
+    description = discord.ui.TextInput(label="Beschreibung", placeholder="Füge eine Beschreibung hinzu",
+                                       style=discord.TextStyle.long, max_length=1500, required=False)
+
+    field1_name = discord.ui.TextInput(label="Feld 1", placeholder="Feld 1 name",
+                                       style=discord.TextStyle.short, max_length=1500, required=False)
+
+    field1_value = discord.ui.TextInput(label="Feld 1", placeholder="Feld 1 value",
+                                        style=discord.TextStyle.long, max_length=1500, required=False)
+
+    async def on_submit(self, interaction) -> None:
+        if self.timestamp == True:
+            embed = discord.Embed(
+                title=self.titel, description=self.description, color=0x0094ff, timestamp=datetime.datetime.now())
+            embed.add_field(name=self.field1_name, value=self.field1_value)
+        elif self.timestamp == False:
+            embed = discord.Embed(
+                title=self.titel, description=self.description, color=0x0094ff)
+            embed.add_field(name=self.field1_name, value=self.field1_value)
+
+        await interaction.response.send_message(embed=embed, view=EmbedBuilderView(channel=self.channel, embed=embed, timestamp=self.timestamp), ephemeral=True)
