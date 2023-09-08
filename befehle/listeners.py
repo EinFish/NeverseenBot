@@ -91,6 +91,7 @@ class Automod(commands.Cog):
             embed.add_field(name="Created:",
                             value=f"<t:{str(created3)}:D>")
             embed.add_field(name="User ID:", value=member.id)
+            embed.add_field(name="User Name:", value=member.mention)
             embed.set_thumbnail(url=member.avatar)
             await logchannel.send(embed=embed)
         except KeyError:
@@ -251,6 +252,7 @@ class Automod(commands.Cog):
                     embed.add_field(name="Created:",
                                     value=f"<t:{str(created3)}:D>")
                     embed.add_field(name="User ID:", value=member.id)
+                    embed.add_field(name="User Name:", value=member.mention)
                     embed.set_thumbnail(url=member.avatar)
                     await logchannel.send(embed=embed)
                 except Exception as error:
