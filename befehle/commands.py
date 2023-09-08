@@ -20,8 +20,11 @@ class TicketButtons(discord.ui.Button):
         with open("serverconfig.json") as file:
             sjson = json.load(file)
         guildid = interaction.guild.id
-        logchannelid = sjson[str(guildid)]["log"]
-        logchannel = await interaction.guild.fetch_channel(logchannelid)
+        try:
+            logchannelid = sjson[str(guildid)]["logchannel"]
+            logchannel = await interaction.guild.fetch_channel(logchannelid)
+        except KeyError:
+            pass
         await interaction.response.defer()
 
         if self.mode == 0:
@@ -91,8 +94,11 @@ class TicketModal(discord.ui.Modal):
         with open("serverconfig.json") as file:
             sjson = json.load(file)
         guildid = interaction.guild.id
-        logchannelid = sjson[str(guildid)]["log"]
-        logchannel = await interaction.guild.fetch_channel(logchannelid)
+        try:
+            logchannelid = sjson[str(guildid)]["logchannel"]
+            logchannel = await interaction.guild.fetch_channel(logchannelid)
+        except KeyError:
+            pass
 
         guildid = interaction.guild.id
         mod = sjson[str(guildid)]["modrole"]
@@ -221,7 +227,7 @@ class ModCommands(discord.app_commands.Group):
                     title="User Gewarnt", description=f"Der User {member.mention} wurde von {interaction.user.mention} gewarnt.", timestamp=datetime.datetime.now(), color=0x0094ff)
                 log.add_field(name="Grund", value=grund)
                 try:
-                    logchannelid = sjson[str(guildid)]["log"]
+                    logchannelid = sjson[str(guildid)]["logchannel"]
                     logchannel = await member.guild.fetch_channel(logchannelid)
                     await logchannel.send(embed=log)
                 except KeyError:
@@ -238,8 +244,11 @@ class ModCommands(discord.app_commands.Group):
 
         if interaction.user.guild_permissions.kick_members:
             guildid = interaction.guild.id
-            channel = interaction.guild.get_channel(
-                int(sjson[str(guildid)]["log"]))
+            try:
+                channel = interaction.guild.get_channel(
+                    int(sjson[str(guildid)]["logchannel"]))
+            except KeyError:
+                pass
             await member.kick(reason=reason)
             await interaction.response.send_message(content=f"Du hast {member.mention} erfolgreich gekickt", ephemeral=True)
 
@@ -259,8 +268,11 @@ class ModCommands(discord.app_commands.Group):
         with open("serverconfig.json") as file:
             sjson = json.load(file)
         guildid = interaction.guild.id
-        channel = interaction.guild.get_channel(
-            int(sjson[str(guildid)]["log"]))
+        try:
+            channel = interaction.guild.get_channel(
+                int(sjson[str(guildid)]["logchannel"]))
+        except KeyError:
+            pass
         if interaction.user.guild_permissions.ban_members:
             await interaction.response.send_message(content=f"Du hast {user.mention} erfolgreich gebannt", ephemeral=True)
             await user.ban(reason=reason)
@@ -283,8 +295,11 @@ class ModCommands(discord.app_commands.Group):
 
         guildid = interaction.guild.id
         if interaction.user.guild_permissions.ban_members:
-            channel = interaction.guild.get_channel(
-                int(sjson[str(guildid)]["log"]))
+            try:
+                channel = interaction.guild.get_channel(
+                    int(sjson[str(guildid)]["logchannel"]))
+            except KeyError:
+                pass
             await interaction.guild.unban(user, reason=reason)
             await interaction.response.send_message(content=f"Du hast {user.mention} erfolgreich entbannt", ephemeral=True)
 
@@ -306,8 +321,11 @@ class ModCommands(discord.app_commands.Group):
                 sjson = json.load(file)
 
             guildid = interaction.guild.id
-            channel = interaction.guild.get_channel(
-                int(sjson[str(guildid)]["log"]))
+            try:
+                channel = interaction.guild.get_channel(
+                    int(sjson[str(guildid)]["logchannel"]))
+            except KeyError:
+                pass
 
             duration = datetime.timedelta(
                 seconds=seconds, minutes=minutes, hours=hours, days=days)
@@ -333,8 +351,11 @@ class ModCommands(discord.app_commands.Group):
             sjson = json.load(file)
 
         guildid = interaction.guild.id
-        channel = interaction.guild.get_channel(
-            int(sjson[str(guildid)]["log"]))
+        try:
+            channel = interaction.guild.get_channel(
+                int(sjson[str(guildid)]["logchannel"]))
+        except KeyError:
+            pass
         if interaction.user.guild_permissions.moderate_members:
             duration = None
             await interaction.response.send_message(content="Du hast das Timeout  von " + member.mention + " aufgehoben", ephemeral=True)
