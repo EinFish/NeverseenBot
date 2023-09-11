@@ -4,6 +4,8 @@ import os
 import asyncio
 import json
 from discord.ext import commands
+from discord.ext.tasks import loop
+from twitch import get_notifications
 
 with open("config.json", "r") as file:
     config = json.load(file)
@@ -26,9 +28,18 @@ if __name__ == "__main__":
                 raise
 
 
-@bot.event
-async def on_ready():
-    print("Bot is running!")
+@loop(seconds=90)
+async def check_twitch_online_streamers():
+    channel = bot.get_channel(1063958884605243524)
+    if not channel:
+        return
+    notifications = get_notifications()
+    for notification in notifications:
+        await channel.send("streamer {} ist jetzt online: {}".format(notification["user_login"], notification))
+
+
+@loop(seconds=10)
+async def presences():
     c = 1
     while (True):
         if (c == 1):
@@ -55,8 +66,14 @@ async def on_ready():
         c += 1
         if (c > 7):
             c = 1
-        await asyncio.sleep(30 * 10)
+        await asyncio.sleep(30)
+
+
+@bot.event
+async def on_ready():
+    print("Bot is running!")
+    check_twitch_online_streamers.start()
+    presences.start()
 
 
 bot.run(config["TOKEN"])
-
