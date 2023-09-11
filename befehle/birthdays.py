@@ -288,7 +288,6 @@ class BirthdayCog(commands.Cog):
     async def on_ready(self):
         birthdaycmds = BirthdayCommands(
             name="birthday", description="Befehle des Birthday Systemes")
-        self.birthdayloop.start()
         self.bot.tree.add_command(birthdaycmds)
         print("Birthdays Geladen!")
 
