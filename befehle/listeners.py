@@ -99,6 +99,13 @@ class Automod(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
+        with open("serverconfig.json") as file:
+            sjson = json.load(file)
+        guildid = guild.id
+        sjson[str(guildid)] = {"name": guild.name}
+
+        with open("serverconfig.json", "w") as json_file:
+            json.dump(sjson, json_file, indent=4)
 
         async for bot_entry in guild.audit_logs(action=discord.AuditLogAction.bot_add, limit=1):
             user = bot_entry.user

@@ -1,6 +1,7 @@
 import discord
 import json
 import datetime
+from typing import Any
 
 
 class ErrorMessage():
@@ -55,7 +56,7 @@ class WarnModal(discord.ui.Modal):
                     title="User Gewarnt", description=f"Der User {self.member.mention} wurde von {interaction.user.mention} gewarnt.", timestamp=datetime.datetime.now(), color=0x0094ff)
                 log.add_field(name="Grund", value=self.grund)
                 try:
-                    logchannelid = sjson[str(guildid)]["log"]
+                    logchannelid = sjson[str(guildid)]["logchannel"]
                     logchannel = await self.member.guild.fetch_channel(logchannelid)
                     await logchannel.send(embed=log)
                 except KeyError:
@@ -79,7 +80,7 @@ class ModButton(discord.ui.Button):
 
             guildid = interaction.guild.id
             channel = interaction.guild.get_channel(
-                int(sjson[str(guildid)]["log"]))
+                int(sjson[str(guildid)]["logchannel"]))
             if interaction.user.guild_permissions.ban_members:
                 await interaction.response.send_message(content=f"Du hast {member.mention} erfolgreich gebannt", ephemeral=True)
                 await member.ban()
@@ -100,7 +101,7 @@ class ModButton(discord.ui.Button):
             if interaction.user.guild_permissions.kick_members:
                 guildid = interaction.guild.id
                 channel = interaction.guild.get_channel(
-                    int(sjson[str(guildid)]["log"]))
+                    int(sjson[str(guildid)]["logchannel"]))
                 await member.kick()
                 await interaction.response.send_message(content=f"Du hast {member.mention} erfolgreich gekickt", ephemeral=True)
 
@@ -121,7 +122,7 @@ class ModButton(discord.ui.Button):
 
                 guildid = interaction.guild.id
                 channel = interaction.guild.get_channel(
-                    int(sjson[str(guildid)]["log"]))
+                    int(sjson[str(guildid)]["logchannel"]))
 
                 duration = datetime.timedelta(
                     seconds=0, minutes=0, hours=3, days=0)
@@ -219,3 +220,79 @@ class EmbedBuilder(discord.ui.Modal):
             embed.add_field(name=self.field1_name, value=self.field1_value)
 
         await interaction.response.send_message(embed=embed, view=EmbedBuilderView(channel=self.channel, embed=embed, timestamp=self.timestamp), ephemeral=True)
+
+
+class BewerbenModal(discord.ui.Modal):
+    def __init__(self):
+        super().__init__(title="Bewerben")
+    frage0 = discord.ui.TextInput(label="Kurze Selbstvorstellung & Deine Motivation", placeholder="Required",
+                                  required=True, style=discord.TextStyle.paragraph, max_length=500, min_length=10)
+    frage1 = discord.ui.TextInput(label="Hast du Erfahrung im Umgang mit Twitch?", placeholder="Required",
+                                  required=True, style=discord.TextStyle.paragraph, max_length=500, min_length=10)
+    frage2 = discord.ui.TextInput(label="Hast du gute Kommunikationsfähigkeiten?", placeholder="Required",
+                                  required=True, style=discord.TextStyle.paragraph, max_length=500, min_length=10)
+    frage3 = discord.ui.TextInput(label="Verantfortungsbewusst und Zeitlich Flexibel?", placeholder="Required",
+                                  required=True, style=discord.TextStyle.paragraph, max_length=500, min_length=10)
+    frage4 = discord.ui.TextInput(label="Kannst du in einem Team arbeiten?", placeholder="Required",
+                                  required=True, style=discord.TextStyle.short, max_length=500, min_length=10)
+
+    async def on_submit(self, interaction) -> None:
+        with open("serverconfig.json") as file:
+            sjson = json.load(file)
+
+        id = interaction.guild.id
+
+        try:
+            if sjson[str(id)]["bewechannel"] != 0:
+                channelid = sjson[str(id)]["bewechannel"]
+            else:
+                channelid = sjson[str(id)]["logchannel"]
+        except KeyError:
+
+            channelid = sjson[str(id)]["logchannel"]
+
+        frage0 = BewerbenModal.frage0
+
+        channel = await interaction.guild.fetch_channel(channelid)
+
+        embed = discord.Embed(title="Neue Bewerbung",
+                              color=0x0094ff, timestamp=datetime.datetime.now(), description=f"Bewerbung von {interaction.user.mention}")
+        embed.add_field(
+            name="Kurze Selbstvorstellung & Deine Motivation", value=self.frage0, inline=False)
+        embed.add_field(
+            name="Hast du Erfahrung im Umgang mit Twitch?", value=self.frage1, inline=False)
+        embed.add_field(
+            name="Hast du gute Kommunikationsfähigkeiten?", value=self.frage2, inline=False)
+        embed.add_field(
+            name="Verantfortungsbewusst und Zeitlich Flexibel?", value=self.frage3, inline=False)
+        embed.add_field(
+            name="Kannst du in einem Team arbeiten?", value=self.frage4, inline=False)
+
+        await channel.send(embed=embed)
+
+        await interaction.response.send_message(content="Bewerbung eingereicht!", ephemeral=True)
+
+
+class BewerbenView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+        self.add_item(BewerbenButton("Bewerben",
+                      discord.ButtonStyle.success))
+
+
+class BewerbenButton(discord.ui.Button):
+    def __init__(self, text, discordbuttonstyle):
+        super().__init__(label=text, style=discordbuttonstyle)
+
+    async def callback(self, interaction: discord.Interaction) -> Any:
+        with open("serverconfig.json") as file:
+            sjson = json.load(file)
+        guildid = interaction.guild.id
+        try:
+            bwp = sjson[str(guildid)]["bwp"]
+            if bwp == True:
+                await interaction.response.send_modal(BewerbenModal())
+            else:
+                await interaction.response.send_message(content="Bewerbungsphase geschlossen.", ephemeral=True)
+        except KeyError:
+            await interaction.response.send_message(content="Bewerbungsphase geschlossen.", ephemeral=True)

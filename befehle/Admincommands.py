@@ -6,8 +6,8 @@ from discord import app_commands
 import json
 import datetime
 
-
-class TicketModal(discord.ui.Modal):
+"""
+class BewerbenModal(discord.ui.Modal):
     def __init__(self):
         super().__init__(title="Bewerben")
     frage0 = discord.ui.TextInput(label="Kurze Selbstvorstellung & Deine Motivation", placeholder="Required",
@@ -36,7 +36,7 @@ class TicketModal(discord.ui.Modal):
 
             channelid = sjson[str(id)]["log"]
 
-        frage0 = TicketModal.frage0
+        frage0 = BewerbenModal.frage0
 
         channel = await interaction.guild.fetch_channel(channelid)
 
@@ -58,22 +58,25 @@ class TicketModal(discord.ui.Modal):
         await interaction.response.send_message(content="Bewerbung eingereicht!", ephemeral=True)
 
 
-class TicketView(discord.ui.View):
+class BewerbenView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
-        self.add_item(TicketButton("Ticket erstellen",
+        self.add_item(BewerbenButton("Bewerben",
                       discord.ButtonStyle.success))
 
 
-class TicketButton(discord.ui.Button):
+class BewerbenButton(discord.ui.Button):
     def __init__(self, text, discordbuttonstyle):
         super().__init__(label=text, style=discordbuttonstyle)
 
     async def callback(self, interaction: discord.Interaction) -> Any:
-        await interaction.response.send_modal(TicketModal())
+        await interaction.response.send_modal(BewerbenModal())
+
+"""
 
 
 class AdminCommands(discord.app_commands.Group):
+    """
     @app_commands.command(name="setup", description="Passe die Einstellungen des Bots an deinen Server an")
     @commands.cooldown(1, 30, commands.BucketType.guild)
     async def setupserver(self, interaction, modrole: discord.Role, logchannel: discord.TextChannel = None, birthdaychannel: discord.TextChannel = None, welcomechannel: discord.TextChannel = None, birthdayrole: discord.Role = None, bewerbungschannel: discord.TextChannel = None):
@@ -269,7 +272,7 @@ class AdminCommands(discord.app_commands.Group):
 
             if phase == True:
                 try:
-                    await channel.send(embed=embed, view=TicketView())
+                    await channel.send(embed=embed, view=BewerbenView())
                 except AttributeError:
                     await interaction.response.send_message(content=f"ERROR: Bitte lege einen Kanal fest.", ephemeral=True)
                     return
@@ -286,6 +289,8 @@ class AdminCommands(discord.app_commands.Group):
         guildid = ctx.guild.id
         del sjson[str(guildid)]
 
+        """
+
 
 class AdminCog(commands.Cog):
     def __init__(self, bot):
@@ -295,7 +300,6 @@ class AdminCog(commands.Cog):
     async def on_ready(self):
         admincmds = AdminCommands(
             name="admin", description="Befehle für admins")
-        self.bot.tree.add_command(admincmds)
         print("AdminCommands Geladen!")
 
     @commands.command()
