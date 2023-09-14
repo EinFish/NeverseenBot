@@ -129,13 +129,21 @@ class BirthdayCommands(discord.app_commands.Group):
             bjson = json.load(file)
 
         try:
-            await interaction.response.defer()
+
             id = interaction.user.id
             id2 = str(id)
 
             if member != None:
                 userid = str(member.id)
-                if interaction.user.guild_permissions.kick_members:
+                if member.id == interaction.user.id:
+                    await interaction.response.defer()
+                    del bjson[id2]["bday"]
+                    embed = discord.Embed(title=f"Geburtstag gelöscht", description=f"Du hast deinen Geburtstag gelöscht.",
+                                          timestamp=datetime.datetime.now(), color=0x0094ff)
+                    await interaction.followup.send(embed=embed)
+
+                elif interaction.user.guild_permissions.kick_members:
+                    await interaction.response.defer()
                     id3 = str(userid)
                     del bjson[id3]["bday"]
                     embed = discord.Embed(title=f"Geburtstag von {member.display_name} gelöscht",
@@ -143,8 +151,9 @@ class BirthdayCommands(discord.app_commands.Group):
                     await interaction.followup.send(embed=embed)
 
                 else:
-                    await interaction.followup.send(content=f"Du hast keine Berechtigung, andere Geburtsdaten zu löschen.", ephemeral=True)
+                    await interaction.response.send_message(content=f"Du hast keine Berechtigung, andere Geburtsdaten zu löschen.", ephemeral=True)
             else:
+                await interaction.response.defer()
                 del bjson[id2]["bday"]
                 embed = discord.Embed(title=f"Geburtstag gelöscht", description=f"Du hast deinen Geburtstag gelöscht.",
                                       timestamp=datetime.datetime.now(), color=0x0094ff)
