@@ -40,8 +40,8 @@ async def check_twitch_online_streamers():
             notification["user_name"]), color=0x0094ff, timestamp=datetime.datetime.now())
         embed.add_field(name="{}".format(
             notification["title"]), inline=False, value="")
-        embed.add_field(name="{}".format(
-            notification["game_name"]), value="{}".format(notification["tags"]))
+        embed.add_field(name="{} | {} | Viewer: {}".format(
+            notification["game_name"], notification["language"], notification["viewer_count"]), value="{}".format(notification["tags"]))
         embed.set_thumbnail(url="{}".format(notification["thumbnail_url"]))
         await channel.send("streamer {} ist jetzt online: {}".format(notification["user_login"], notification))
         await channel.send(embed=embed)
@@ -88,17 +88,18 @@ async def birthdayloop():
 
     currenttime = datetime.datetime.fromtimestamp(
         int(time.time())).strftime('%H')
-    if currenttime == "8":  # Es ist 3 Uhr morgends
+    if currenttime == "08":  # Es ist 3 Uhr morgends
         try:
             config = sjson  # config laden
             for server in config:
                 try:
+                    try:
+                        roleid = int(config[server]["bdayrole"])
+                        channelid = int(config[server]["bday"])
+                    except:
+                        pass
 
-                    roleid = int(config[server]["bdayrole"])
-                    channelid = int(config[server]["bday"])
-
-                    # <- Wenn es einen Ping geben soll
-                    pingid = int(config[server]["bdayrole"])
+                    # pingid = int(config[server]["bdayrole"]) <- Wenn es einen Ping geben soll
                     guild = bot.get_guild(int(server))
 
                     birthdayconfig = bjson  # Birthdayconfig von den Server laden
@@ -128,8 +129,8 @@ async def birthdayloop():
 
                     try:
 
-                        # <- Wenn ping gewünscht
-                        content = guild.get_role(int(pingid)).mention
+                        # content = guild.get_role(int(pingid)).mention <- Wenn ping gewünscht
+                        content = None
                         pass
                     except:
                         content = None
