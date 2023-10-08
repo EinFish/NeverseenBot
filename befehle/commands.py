@@ -12,8 +12,8 @@ from utils import ModViewView
 
 
 class TicketButtons(discord.ui.Button):
-    def __init__(self, text, discordbuttonstyle, mode):
-        super().__init__(label=text, style=discordbuttonstyle)
+    def __init__(self, text, discordbuttonstyle, mode, custom_id):
+        super().__init__(label=text, style=discordbuttonstyle, custom_id=custom_id)
         self.mode = mode
 
     async def callback(self, interaction: discord.Interaction):
@@ -62,7 +62,7 @@ class TicketView2(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
         self.add_item(TicketButtons("Ticket schließen",
-                      discord.ButtonStyle.danger, 0))
+                      discord.ButtonStyle.danger, 0, "tc2"))
 
 
 class EmbedBuilder(discord.ui.Modal):
@@ -127,8 +127,8 @@ class TicketModal(discord.ui.Modal):
 
 
 class TicketButton(discord.ui.Button):
-    def __init__(self, text, discordbuttonstyle):
-        super().__init__(label=text, style=discordbuttonstyle)
+    def __init__(self, text, discordbuttonstyle, custom_id):
+        super().__init__(label=text, style=discordbuttonstyle, custom_id=custom_id)
 
     async def callback(self, interaction: discord.Interaction) -> Any:
         await interaction.response.send_modal(TicketModal())
@@ -138,7 +138,7 @@ class TicketView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
         self.add_item(TicketButton("Ticket erstellen",
-                      discord.ButtonStyle.success))
+                      discord.ButtonStyle.success, "tc1"))
 
 
 class ModCommands(discord.app_commands.Group):

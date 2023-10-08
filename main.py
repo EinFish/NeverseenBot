@@ -4,6 +4,7 @@ import time
 import os
 import asyncio
 import json
+from befehle import commands as cmds
 from discord.ext import commands
 from discord.ext.tasks import loop
 from twitch import get_notifications
@@ -148,10 +149,17 @@ async def birthdayloop():
 
 @bot.event
 async def on_ready():
-    print("Bot is running!")
+    
     check_twitch_online_streamers.start()
     presences.start()
     birthdayloop.start()
+    print("Loop's started!")
+    bot.add_view(cmds.TicketView())
+    bot.add_view(cmds.TicketView2())
+    bot.add_view(cmds.HelpView())
+    print("Added Views!")
+    print(10* "-")
+    print("Bot is running!")
 
 
 bot.run(config["TOKEN"])
