@@ -156,7 +156,6 @@ async def on_ready():
     print("Loop's started!")
     bot.add_view(cmds.TicketView())
     bot.add_view(cmds.TicketView2())
-    bot.add_view(cmds.HelpView())
     print("Added Views!")
     print(10* "-")
     print("Bot is running!")

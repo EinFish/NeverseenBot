@@ -94,6 +94,7 @@ class Utilities(discord.app_commands.Group):
         embed.add_field(name="Original Text:", value=sentence, inline=False)
         embed.set_footer(text="Translated via Google")
         await interacion.response.send_message(embed=embed)
+        
 
 
 class UtilitiesCog(commands.Cog):
