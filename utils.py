@@ -67,8 +67,8 @@ class WarnModal(discord.ui.Modal):
 
 
 class ModButton(discord.ui.Button):
-    def __init__(self, text, discordbuttonstyle, mode, member):
-        super().__init__(label=text, style=discordbuttonstyle)
+    def __init__(self, text, discordbuttonstyle, mode, member, custom_id):
+        super().__init__(label=text, style=discordbuttonstyle, custom_id=custom_id)
         self.mode = mode
         self.member = member
 
@@ -153,50 +153,56 @@ class ModViewView(discord.ui.View):
         self.member = member
         super().__init__(timeout=None)
         self.add_item(
-            ModButton("Bannen", discord.ButtonStyle.danger, 0, self.member))
+            ModButton("Bannen", discord.ButtonStyle.danger, 0, self.member, custom_id="vb1"))
         self.add_item(
-            ModButton("Kicken", discord.ButtonStyle.blurple, 1, self.member))
+            ModButton("Kicken", discord.ButtonStyle.blurple, 1, self.member, custom_id="vb2"))
         self.add_item(
-            ModButton("Muten (3h)", discord.ButtonStyle.secondary, 2, self.member))
+            ModButton("Muten (3h)", discord.ButtonStyle.secondary, 2, self.member, custom_id="vb3"))
         self.add_item(
-            ModButton("Warnen", discord.ButtonStyle.danger, 3, self.member))
+            ModButton("Warnen", discord.ButtonStyle.danger, 3, self.member, custom_id="vb4"))
 
 
 class EmbedBuilderButton(discord.ui.Button):
-    def __init__(self, text, discordbuttonstyle, mode, channel, embed, timestamp):
-        super().__init__(label=text, style=discordbuttonstyle)
+    def __init__(self, text, discordbuttonstyle, mode, channel, embed, timestamp, custom_id, i):
+        super().__init__(label=text, style=discordbuttonstyle, custom_id=custom_id)
         self.mode = mode
         self.channel = channel
         self.embed = embed
         self.timestamp = timestamp
+        self.i = i
 
     async def callback(self, interaction: discord.Interaction):
         channel = self.channel
         embed = self.embed
         if self.mode == 0:
             await channel.send(embed=embed)
+            self.disabled = True
+            
             await interaction.response.send_message(content="Embed versendet.", ephemeral=True)
+            
 
         if self.mode == 1:
             await interaction.response.send_modal(EmbedBuilder(channel=channel, timestamp=self.timestamp))
 
 
 class EmbedBuilderView(discord.ui.View):
-    def __init__(self, channel, embed, timestamp):
+    def __init__(self, channel, embed, timestamp, i):
         self.channel = channel
         self.embed = embed
         self.timestamp = timestamp
+        self.interaction = i
         super().__init__(timeout=None)
         self.add_item(EmbedBuilderButton(
-            "Passt so", discord.ButtonStyle.success, 0, channel=channel, embed=embed, timestamp=timestamp))
+            "Passt so", discord.ButtonStyle.success, 0, channel=channel, embed=embed, timestamp=timestamp, custom_id="eb1", i=i))
         self.add_item(EmbedBuilderButton(
-            "Nein", discord.ButtonStyle.danger, 1, channel=channel, embed=embed, timestamp=timestamp))
+            "Nein", discord.ButtonStyle.danger, 1, channel=channel, embed=embed, timestamp=timestamp, custom_id="eb2", i=i))
 
 
 class EmbedBuilder(discord.ui.Modal):
-    def __init__(self, channel, timestamp) -> None:
+    def __init__(self, channel, timestamp, i) -> None:
         self.channel = channel
         self.timestamp = timestamp
+        self.i = i
         super().__init__(title="Embed Builder")
     titel = discord.ui.TextInput(
         label="Titel:", placeholder="Setzte einen Titel", style=discord.TextStyle.short)
@@ -219,7 +225,7 @@ class EmbedBuilder(discord.ui.Modal):
                 title=self.titel, description=self.description, color=0x0094ff)
             embed.add_field(name=self.field1_name, value=self.field1_value)
 
-        await interaction.response.send_message(embed=embed, view=EmbedBuilderView(channel=self.channel, embed=embed, timestamp=self.timestamp), ephemeral=True)
+        await interaction.response.send_message(embed=embed, view=EmbedBuilderView(channel=self.channel, embed=embed, timestamp=self.timestamp, i=self.i), ephemeral=True)
 
 
 class BewerbenModal(discord.ui.Modal):
@@ -277,12 +283,12 @@ class BewerbenView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
         self.add_item(BewerbenButton("Bewerben",
-                      discord.ButtonStyle.success))
+                      discord.ButtonStyle.success, custom_id="bb1"))
 
 
 class BewerbenButton(discord.ui.Button):
-    def __init__(self, text, discordbuttonstyle):
-        super().__init__(label=text, style=discordbuttonstyle)
+    def __init__(self, text, discordbuttonstyle, custom_id):
+        super().__init__(label=text, style=discordbuttonstyle, custom_id=custom_id)
 
     async def callback(self, interaction: discord.Interaction) -> Any:
         with open("serverconfig.json") as file:

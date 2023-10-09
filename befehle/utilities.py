@@ -72,7 +72,7 @@ class Utilities(discord.app_commands.Group):
     @app_commands.command(name="embed-builder", description="Erstelle ein Embed")
     async def eb(self, interaction, channel: discord.TextChannel, timestamp: bool = False):
         if interaction.user.guild_permissions.manage_roles:
-            await interaction.response.send_modal(EmbedBuilder(channel=channel, timestamp=timestamp))
+            await interaction.response.send_modal(EmbedBuilder(channel=channel, timestamp=timestamp, i=interaction))
         else:
             await interaction.response.send_message(content="Du hast keine Berechtigung dafür.", ephemeral=True)
 
@@ -82,10 +82,8 @@ class Utilities(discord.app_commands.Group):
             if not lang.lower() in googletrans.LANGCODES.keys():
                 await interacion.response.send_message(content="Translation Failed!\nThe target language must be a real Language.", ephemeral=True)
                 return
-            else:
-                pass
         t = Translator()
-        a = t.translate(sentence, dest=lang)
+        a = t.translate(text=sentence, dest=lang)
         detected_lang = t.detect(sentence)
         lang_str = str(detected_lang.lang.capitalize())
         embed = discord.Embed(title="Translator",
@@ -94,7 +92,7 @@ class Utilities(discord.app_commands.Group):
         embed.add_field(name="Original Text:", value=sentence, inline=False)
         embed.set_footer(text="Translated via Google")
         await interacion.response.send_message(embed=embed)
-        
+
 
 
 class UtilitiesCog(commands.Cog):
