@@ -85,11 +85,11 @@ class EmbedBuilder(discord.ui.Modal):
 
 
 class TicketModal(discord.ui.Modal):
-    def __init__(self, ping):
-        super().__init__(title="Problembeschreibung:")
+    def __init__(self, ping, title):
+        super().__init__(title=title)
         self.ping = ping
-    problem = discord.ui.TextInput(label="Was ist dein Anliegen?", placeholder="Problem",
-                                   required=True, style=discord.TextStyle.short, max_length=100, min_length=10)
+    problem = discord.ui.TextInput(label="Anliegen", placeholder="Schreibe hier...",
+                                   required=True, style=discord.TextStyle.long, max_length=500, min_length=10)
 
     async def on_submit(self, interaction) -> None:
         with open("serverconfig.json") as file:
@@ -102,21 +102,18 @@ class TicketModal(discord.ui.Modal):
             pass
 
         guildid = interaction.guild.id
-        mod = sjson[str(guildid)]["modrole"]
         Channel = interaction.channel
         self.person = interaction.user.mention
-        id = interaction.user.id
         self.Thread = await Channel.create_thread(name=interaction.user.display_name)
         await interaction.response.send_message(content="Dein Ticket findest du hier: " + self.Thread.jump_url, ephemeral=True)
-        embed = discord.Embed(color=0x0094ff, timestamp=datetime.datetime.now(), title=self.problem, description=interaction.user.mention +
-                              " bitte beschreibe dein Problem näher. Es wird sich bald ein Team Mitglied um dein Problem kümmern.")
+        embed = discord.Embed(color=0x0094ff, timestamp=datetime.datetime.now(), title=interaction.user.display_name, description=interaction.user.mention + " bitte beschreibe dein Problem näher. Es wird sich bald ein Team Mitglied um dein Problem kümmern.\n\nProblem:\n{}".format(self.problem))
         await self.Thread.send(content=f"{self.person}, {self.ping.mention}", embed=embed, view=TicketView2())
 
         try:
             member = interaction.user
             embed = discord.Embed(
                 title="Ticket erstellt", color=0x0094ff, timestamp=datetime.datetime.now())
-            embed.add_field(name="Ticket von::",
+            embed.add_field(name="Ticket von:",
                             value=f"{member.mention}")
             embed.add_field(name="User ID:", value=member.id)
             embed.add_field(
@@ -128,19 +125,20 @@ class TicketModal(discord.ui.Modal):
 
 
 class TicketButton(discord.ui.Button):
-    def __init__(self, text, discordbuttonstyle, custom_id, ping):
+    def __init__(self, text, discordbuttonstyle, custom_id, ping, title):
         super().__init__(label=text, style=discordbuttonstyle, custom_id=custom_id)
         self.ping = ping
+        self.title = title
 
     async def callback(self, interaction: discord.Interaction) -> Any:
-        await interaction.response.send_modal(TicketModal(ping=self.ping))
+        await interaction.response.send_modal(TicketModal(ping=self.ping, title=self.title))
 
 
 class TicketView(discord.ui.View):
-    def __init__(self, label = None, ping = None):
+    def __init__(self, label = None, ping = None, text = "Ticket"):
         super().__init__(timeout=None)
         self.add_item(TicketButton(label,
-                      discord.ButtonStyle.success, "tc1", ping))
+                      discord.ButtonStyle.success, "tc1", ping, text))
 
 
 class ModCommands(discord.app_commands.Group):
@@ -159,7 +157,7 @@ class ModCommands(discord.app_commands.Group):
             embed = discord.Embed(
                 title=titel, description=text, color=0x0094ff)
             await interaction.response.send_message(content="erstellt", ephemeral=True)
-            await channel.send(embed=embed, view=TicketView(label=buttonlabel, ping=ping))
+            await channel.send(embed=embed, view=TicketView(label=buttonlabel, ping=ping, text=titel))
         else:
             await interaction.response.send_message(content=f"Du hast keine Berechtigung dafür.", ephemeral=True)
 
