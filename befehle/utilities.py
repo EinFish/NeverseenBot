@@ -70,9 +70,9 @@ class Utilities(discord.app_commands.Group):
             await ctx.response.send_message("Du bist auf der Blacklist.", ephemeral=True)
 
     @app_commands.command(name="embed-builder", description="Erstelle ein Embed")
-    async def eb(self, interaction, channel: discord.TextChannel, timestamp: bool = False):
+    async def eb(self, interaction: discord.Interaction, channel: discord.TextChannel, timestamp: bool = False, thumbnail: discord.Attachment = None):
         if interaction.user.guild_permissions.manage_roles:
-            await interaction.response.send_modal(EmbedBuilder(channel=channel, timestamp=timestamp, i=interaction))
+            await interaction.response.send_modal(EmbedBuilder(channel=channel, timestamp=timestamp, i=interaction, thumb=thumbnail))
         else:
             await interaction.response.send_message(content="Du hast keine Berechtigung dafür.", ephemeral=True)
 
