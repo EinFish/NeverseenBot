@@ -135,9 +135,9 @@ class TicketButton(discord.ui.Button):
 
 
 class TicketView(discord.ui.View):
-    def __init__(self):
+    def __init__(self, label):
         super().__init__(timeout=None)
-        self.add_item(TicketButton("Ticket erstellen",
+        self.add_item(TicketButton(label,
                       discord.ButtonStyle.success, "tc1"))
 
 
@@ -145,7 +145,7 @@ class ModCommands(discord.app_commands.Group):
 
     @app_commands.command(name="ticketchannel", description="Lege den Kanal für die Tickets fest.")
     @commands.cooldown(1, 20, commands.BucketType.user)
-    async def ticket_channel(self, interaction, channel: discord.TextChannel, titel: str, text: str = ""):
+    async def ticket_channel(self, interaction, channel: discord.TextChannel, titel: str, text: str = "", buttonlabel: str= "Ticket erstellen"):
         if interaction.user.guild_permissions.administrator:
             if text == "":
                 text = "Klicke auf den unteren Knopf um ein " + titel + " Ticket zu erstellen."
@@ -153,7 +153,7 @@ class ModCommands(discord.app_commands.Group):
             embed = discord.Embed(
                 title=titel, description=text, color=0x0094ff)
             await interaction.response.send_message(content="erstellt", ephemeral=True)
-            await channel.send(embed=embed, view=TicketView())
+            await channel.send(embed=embed, view=TicketView(label=buttonlabel))
         else:
             await interaction.response.send_message(content=f"Du hast keine Berechtigung dafür.", ephemeral=True)
 

@@ -158,7 +158,6 @@ async def on_ready():
     bot.add_view(cmds.TicketView())
     bot.add_view(cmds.TicketView2())
     bot.add_view(utils.BewerbenView())
-    bot.add_view(utils.ModViewView())
     print("Added Views!")
     print(10* "-")
     print("Bot is running!")

@@ -306,3 +306,6 @@ class BewerbenButton(discord.ui.Button):
                 await interaction.response.send_message(content="Bewerbungsphase geschlossen.", ephemeral=True)
         except KeyError:
             await interaction.response.send_message(content="Bewerbungsphase geschlossen.", ephemeral=True)
+
+
+            
