@@ -152,7 +152,7 @@ class ModCommands(discord.app_commands.Group):
             if text == "":
                 text = "Klicke auf den unteren Knopf um ein " + titel + " Ticket zu erstellen."
             if ping == None:
-                ping = sjson[str(interaction.guil.id)]["modrole"]
+                ping = sjson[str(interaction.guild.id)]["modrole"]
             elif ping != None:
                 ping = ping.mention
 
