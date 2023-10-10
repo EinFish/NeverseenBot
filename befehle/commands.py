@@ -107,7 +107,7 @@ class TicketModal(discord.ui.Modal):
         self.Thread = await Channel.create_thread(name=interaction.user.display_name)
         await interaction.response.send_message(content="Dein Ticket findest du hier: " + self.Thread.jump_url, ephemeral=True)
         embed = discord.Embed(color=0x0094ff, timestamp=datetime.datetime.now(), title=interaction.user.display_name, description=interaction.user.mention + " bitte beschreibe dein Problem näher. Es wird sich bald ein Team Mitglied um dein Problem kümmern.\n\nProblem:\n{}".format(self.problem))
-        await self.Thread.send(content=f"{self.person}, {self.ping.mention}", embed=embed, view=TicketView2())
+        await self.Thread.send(content=f"{self.person}, {self.ping}", embed=embed, view=TicketView2())
 
         try:
             member = interaction.user
@@ -153,6 +153,8 @@ class ModCommands(discord.app_commands.Group):
                 text = "Klicke auf den unteren Knopf um ein " + titel + " Ticket zu erstellen."
             if ping == None:
                 ping = sjson[str(interaction.guil.id)]["modrole"]
+            elif ping != None:
+                ping = ping.mention
 
             embed = discord.Embed(
                 title=titel, description=text, color=0x0094ff)
