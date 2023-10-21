@@ -1,5 +1,6 @@
 import json
 import requests
+import utils
 import datetime
 
 with open("config.json") as file:
@@ -54,7 +55,16 @@ online_users = {}
 
 
 def get_notifications():
-    users = get_users(config["watchlist"])
+    list = []
+    sjson = utils.twitchconfig()
+
+    for i in sjson["watchlist"]:
+        if i in list:
+            pass
+        else:
+            list.append(i)
+
+    users = get_users(list)
     streams = get_streams(users)
 
     notifications = []

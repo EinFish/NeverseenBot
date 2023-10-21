@@ -33,20 +33,36 @@ if __name__ == "__main__":
 
 @loop(seconds=90)
 async def check_twitch_online_streamers():
-    channel = bot.get_channel(1063958884605243524)
-    if not channel:
-        return
+    sjson = utils.serverjson()
     notifications = get_notifications()
     for notification in notifications:
+        image = "{}".format(notification["thumbnail_url"]).replace(
+            "{width}x{height}", "1920x1080")
+        liste = notification["tags"]
+        tags = "Tags: "
+        for i in liste:
+            tags += i + ", "
         embed = discord.Embed(title="{} ist jetzt live".format(
-            notification["user_name"]), color=0x0094ff, timestamp=datetime.datetime.now())
+            notification["user_name"]), color=0x7A50BE, timestamp=datetime.datetime.now())
         embed.add_field(name="{}".format(
             notification["title"]), inline=False, value="")
         embed.add_field(name="{} | {} | Viewer: {}".format(
-            notification["game_name"], notification["language"], notification["viewer_count"]), value="{}".format(notification["tags"]))
-        embed.set_thumbnail(url="{}".format(notification["thumbnail_url"]))
-        await channel.send("streamer {} ist jetzt online: {}".format(notification["user_login"], notification))
-        await channel.send(embed=embed)
+            notification["game_name"], notification["language"], notification["viewer_count"]), value="{}".format(tags))
+        embed.set_image(url=image)
+        for server in sjson:
+            ping = sjson[server]["watchlist"][notification["user_login"]]["ping"]
+            try:
+                channel = bot.get_channel(
+                    sjson[server]["watchlist"][notification["user_login"]]["channel"])
+            except KeyError:
+                pass
+            try:
+                content = channel.guild.get_role(ping).mention
+            except:
+                content = None
+            if not channel:
+                pass
+            await channel.send(embed=embed, content=content)
 
 
 @loop(seconds=10)

@@ -2,6 +2,7 @@ import discord
 import json
 import datetime
 from typing import Any
+import requests
 from discord import ui
 
 
@@ -18,25 +19,25 @@ async def errordcmessage(interaction, error):
 
 
 class bugReportModal(ui.Modal, title="Bugreport"):
-        command = ui.TextInput(label="In welchem Befehl tritt der Bug auf?",
-                               style=discord.TextStyle.short, placeholder="/fun twitch", required=True, max_length=255)
-        excepted = ui.TextInput(label="Was hast du von dem Befehl erwartet?", style=discord.TextStyle.long,
-                                placeholder="Informationen über einen Twitch Streamer", required=True, max_length=255)
-        actual = ui.TextInput(label="Was hat dir der Befehl zurückgegeben?", style=discord.TextStyle.long,
-                              placeholder="Nichts. Es lädt nur für immer", required=True, max_length=1024)
-        reproduce = ui.TextInput(label="Was hast du gemacht, dass der Bug auftritt?",
-                                 style=discord.TextStyle.long, placeholder="Den Befehl ausgeführt", required=True, max_length=1024)
-        extra = ui.TextInput(label="Sonst noch etwas, das wichtig ist?",
-                             style=discord.TextStyle.long, placeholder="", required=False, max_length=1024)
+    command = ui.TextInput(label="In welchem Befehl tritt der Bug auf?",
+                           style=discord.TextStyle.short, placeholder="/fun twitch", required=True, max_length=255)
+    excepted = ui.TextInput(label="Was hast du von dem Befehl erwartet?", style=discord.TextStyle.long,
+                            placeholder="Informationen über einen Twitch Streamer", required=True, max_length=255)
+    actual = ui.TextInput(label="Was hat dir der Befehl zurückgegeben?", style=discord.TextStyle.long,
+                          placeholder="Nichts. Es lädt nur für immer", required=True, max_length=1024)
+    reproduce = ui.TextInput(label="Was hast du gemacht, dass der Bug auftritt?",
+                             style=discord.TextStyle.long, placeholder="Den Befehl ausgeführt", required=True, max_length=1024)
+    extra = ui.TextInput(label="Sonst noch etwas, das wichtig ist?",
+                         style=discord.TextStyle.long, placeholder="", required=False, max_length=1024)
 
-        async def on_submit(self, interaction) -> None:
-            recivers = config["OWNER_ID"]
-            for reciver in recivers:
-                reciv = interaction.client.get_user(reciver)
-                await reciv.send(embed=discord.Embed(title="Bugreport", description=f"Bug reportet von {interaction.user} ({interaction.user.id})\n```\nBefehl: {self.command}\n\nerwartet: {self.excepted}\n\ntatsächlich: {self.actual}\n\nreproduce: {self.reproduce}\n\nExtra: {self.extra}\n```", color=0x7A50BE))
-            embed = discord.Embed(
-                title="Danke", description="Der Bug wurde reportet. Vielen Dank!", color=0x7A50BE)
-            await interaction.response.send_message(embed=embed, ephemeral=True)
+    async def on_submit(self, interaction) -> None:
+        recivers = config["OWNER_ID"]
+        for reciver in recivers:
+            reciv = interaction.client.get_user(reciver)
+            await reciv.send(embed=discord.Embed(title="Bugreport", description=f"Bug reportet von {interaction.user} ({interaction.user.id})\n```\nBefehl: {self.command}\n\nerwartet: {self.excepted}\n\ntatsächlich: {self.actual}\n\nreproduce: {self.reproduce}\n\nExtra: {self.extra}\n```", color=0x7A50BE))
+        embed = discord.Embed(
+            title="Danke", description="Der Bug wurde reportet. Vielen Dank!", color=0x7A50BE)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 class BugreportButton(discord.ui.Button):
@@ -56,9 +57,7 @@ class Bugreportview(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
         self.add_item(BugreportButton("Bug reporten",
-                                      discord.ButtonStyle.success)) 
-
-
+                                      discord.ButtonStyle.success))
 
 
 class WarnModal(discord.ui.Modal):
@@ -227,9 +226,8 @@ class EmbedBuilderButton(discord.ui.Button):
         if self.mode == 0:
             await channel.send(embed=embed)
             self.disabled = True
-            
+
             await interaction.response.send_message(content="Embed versendet.", ephemeral=True)
-            
 
         if self.mode == 1:
             await interaction.response.send_modal(EmbedBuilder(channel=channel, timestamp=self.timestamp))
@@ -358,4 +356,33 @@ class BewerbenButton(discord.ui.Button):
             await interaction.response.send_message(content="Bewerbungsphase geschlossen.", ephemeral=True)
 
 
-            
+def twitchconfig():
+    with open("twitchconfig.json") as file:
+        tconfig = json.load(file)
+    return tconfig
+
+
+def config():
+    with open("config.json") as file:
+        config = json.load(file)
+    return config
+
+
+def serverjson():
+    with open("serverconfig.json") as file:
+        wjson = json.load(file)
+    return wjson
+
+
+def get_app_access_token():
+    tconfig = twitchconfig()
+    params = {
+        "client_id": tconfig["client_id"],
+        "client_secret": tconfig["client_secret"],
+        "grant_type": "client_credentials"
+    }
+
+    response = requests.post(
+        "https://id.twitch.tv/oauth2/token", params=params)
+    access_token = response.json()["access_token"]
+    return access_token
