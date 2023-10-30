@@ -21,7 +21,7 @@ class ExeptionHandler(commands.Cog):
         if isinstance(error, discord.app_commands.CommandOnCooldown):
             await interaction.followup.send(content=f"Dieser Befehl is auf Cooldown! Du kannst ihn nutzen nach: \n{int(error.retry_after)} Sekunden")
         else:
-            utils.errordcmessage(interaction=interaction, error=error)
+            await utils.errordcmessage(interaction=interaction, error=error)
 
 
 async def setup(bot: commands.Bot):

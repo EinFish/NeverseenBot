@@ -13,7 +13,7 @@ from discord.utils import MISSING
 import time
 import utils
 
-errormessage = utils.ErrorMessage.errordcmessage
+errormessage = utils.errordcmessage
 
 
 class BirthdayCommands(discord.app_commands.Group):

@@ -85,13 +85,12 @@ class EmbedBuilder(discord.ui.Modal):
 
 
 class TicketModal(discord.ui.Modal):
-    def __init__(self, ping, title):
+    def __init__(self, title):
         super().__init__(title=title)
-        self.ping = ping
     problem = discord.ui.TextInput(label="Anliegen", placeholder="Schreibe hier...",
                                    required=True, style=discord.TextStyle.long, max_length=500, min_length=10)
 
-    async def on_submit(self, interaction) -> None:
+    async def on_submit(self, interaction: discord.Interaction) -> None:
         with open("serverconfig.json") as file:
             sjson = json.load(file)
         guildid = interaction.guild.id
@@ -101,13 +100,20 @@ class TicketModal(discord.ui.Modal):
         except KeyError:
             pass
 
+        try:
+            ping = sjson[str(interaction.guild.id)
+                         ][str(interaction.message.id)]
+        except KeyError:
+            ping = None
+
         guildid = interaction.guild.id
         Channel = interaction.channel
         self.person = interaction.user.mention
         self.Thread = await Channel.create_thread(name=interaction.user.display_name)
         await interaction.response.send_message(content="Dein Ticket findest du hier: " + self.Thread.jump_url, ephemeral=True)
-        embed = discord.Embed(color=0x0094ff, timestamp=datetime.datetime.now(), title=interaction.user.display_name, description=interaction.user.mention + " bitte beschreibe dein Problem näher. Es wird sich bald ein Team Mitglied um dein Problem kümmern.\n\nProblem:\n{}".format(self.problem))
-        await self.Thread.send(content=f"{self.person}, {self.ping}", embed=embed, view=TicketView2())
+        embed = discord.Embed(color=0x0094ff, timestamp=datetime.datetime.now(), title=interaction.user.display_name, description=interaction.user.mention +
+                              " bitte beschreibe dein Problem näher. Es wird sich bald ein Team Mitglied um dein Problem kümmern.\n\nProblem:\n{}".format(self.problem))
+        await self.Thread.send(content=f"{self.person}, {ping}", embed=embed, view=TicketView2())
 
         try:
             member = interaction.user
@@ -121,31 +127,31 @@ class TicketModal(discord.ui.Modal):
             await logchannel.send(embed=embed)
 
         except Exception as error:
-            print(error)
+            pass
 
 
 class TicketButton(discord.ui.Button):
-    def __init__(self, text, discordbuttonstyle, custom_id, ping, title):
+    def __init__(self, text, discordbuttonstyle, custom_id, title):
         super().__init__(label=text, style=discordbuttonstyle, custom_id=custom_id)
-        self.ping = ping
+
         self.title = title
 
     async def callback(self, interaction: discord.Interaction) -> Any:
-        await interaction.response.send_modal(TicketModal(ping=self.ping, title=self.title))
+        await interaction.response.send_modal(TicketModal(title=self.title))
 
 
 class TicketView(discord.ui.View):
-    def __init__(self, label = None, ping = None, text = "Ticket"):
+    def __init__(self, label=None, ping=None, text="Ticket"):
         super().__init__(timeout=None)
         self.add_item(TicketButton(label,
-                      discord.ButtonStyle.success, "tc1", ping, text))
+                      discord.ButtonStyle.success, "tc1", text))
 
 
 class ModCommands(discord.app_commands.Group):
 
     @app_commands.command(name="ticketchannel", description="Lege den Kanal für die Tickets fest.")
     @commands.cooldown(1, 20, commands.BucketType.user)
-    async def ticket_channel(self, interaction, channel: discord.TextChannel, titel: str, text: str = "", buttonlabel: str= "Ticket erstellen", ping: discord.Role = None):
+    async def ticket_channel(self, interaction, channel: discord.TextChannel, titel: str, text: str = "", buttonlabel: str = "Ticket erstellen", ping: discord.Role = None):
         if interaction.user.guild_permissions.administrator:
             with open("serverconfig.json") as file:
                 sjson = json.load(file)
@@ -159,7 +165,10 @@ class ModCommands(discord.app_commands.Group):
             embed = discord.Embed(
                 title=titel, description=text, color=0x0094ff)
             await interaction.response.send_message(content="erstellt", ephemeral=True)
-            await channel.send(embed=embed, view=TicketView(label=buttonlabel, ping=ping, text=titel))
+            message = await channel.send(embed=embed, view=TicketView(label=buttonlabel, ping=ping, text=titel))
+            sjson[str(interaction.guild.id)][str(message.id)] = ping
+            with open("serverconfig.json", "w") as json_file:
+                json.dump(sjson, json_file, indent=4)
         else:
             await interaction.response.send_message(content=f"Du hast keine Berechtigung dafür.", ephemeral=True)
 

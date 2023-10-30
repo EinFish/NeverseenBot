@@ -6,7 +6,7 @@ from typing import Literal
 import datetime
 import utils
 
-errormessage = utils.ErrorMessage.errordcmessage
+errormessage = utils.errordcmessage
 
 
 sspauswahl = ""
