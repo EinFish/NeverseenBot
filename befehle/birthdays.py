@@ -195,7 +195,7 @@ class BirthdayCommands(discord.app_commands.Group):
         jsonData = bjson  # Daten aus JSON laden
 
         users = list(jsonData)  # Ein Array mit UserIDs aus der JSON machen
-        maxBDaysPerPage = 10  # Die Maximalen Geburtstage die pro Seite angezeigt werden sollen
+        maxBDaysPerPage = 2  # Die Maximalen Geburtstage die pro Seite angezeigt werden sollen
 
         currentPage = 0  # Die Aktuelle Seite
 
@@ -246,10 +246,14 @@ class BirthdayCommands(discord.app_commands.Group):
         def generatePageContent():
             text = ""
             for birthday in chunkedBirthdays[currentPage]:
-                if birthday['showAge']:
-                    text += f"<@{birthday['user']}> ({birthday['newAge']}. Geburtstag) - <t:{birthday['timestamp']}:D> <t:{birthday['timestamp']}:R>\n"
+                if birthday['inDays'] == -1:
+                    string = "Heute"
                 else:
-                    text += f"<@{birthday['user']}> - <t:{birthday['timestamp']}:D> <t:{birthday['timestamp']}:R>\n"
+                    string = f" <t:{birthday['timestamp']}:R>"
+                if birthday['showAge']:
+                    text += f"<@{birthday['user']}> ({birthday['newAge']}. Geburtstag) - <t:{birthday['timestamp']}:D> {string}\n"
+                else:
+                    text += f"<@{birthday['user']}> - <t:{birthday['timestamp']}:D> {string}\n"
             return text
 
         async def nextPage(interaction):
@@ -267,7 +271,12 @@ class BirthdayCommands(discord.app_commands.Group):
             await updateEmbed(interaction)
 
         def getEmbed():
-            embed = discord.Embed(title="Die nächsten Geburtstage", description=generatePageContent(
+            if currentPage == 0:
+                a = 1
+            elif currentPage != 0:
+                a = currentPage
+                a += 1
+            embed = discord.Embed(title=f"Die nächsten Geburtstage | Seite {a}", description=generatePageContent(
             ), color=0x0094ff, timestamp=datetime.datetime.now())
             return embed
 
