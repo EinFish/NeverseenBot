@@ -10,7 +10,7 @@ class StreamerCommands(discord.app_commands.Group):
     @app_commands.command(name="add", description="adds a Streamer to the Notification List")
     async def add(self, interaction: discord.Interaction, channel: Union[discord.TextChannel, discord.Thread], ping: discord.Role = None):
         if interaction.user.guild_permissions.administrator:
-            streamer = "neverseen_minecraft"
+            streamer = "neverseen_tv"
             sjson = utils.serverjson()
             dict = sjson[str(interaction. guild. id)]["watchlist"]
             if streamer in dict.keys():

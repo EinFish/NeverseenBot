@@ -1,7 +1,7 @@
 import discord
 import json
 import datetime
-from typing import Any
+from typing import Any, Literal
 import requests
 from discord import ui
 
@@ -386,3 +386,33 @@ def get_app_access_token():
         "https://id.twitch.tv/oauth2/token", params=params)
     access_token = response.json()["access_token"]
     return access_token
+
+
+def savejson(file: dict, json_name: Literal["serverconfig","users","languages","reactions", "twitch"]):
+    try:
+        if type(file) != dict:
+            print("Please Devide a Dictionary.")
+            return
+        if json_name == "serverconfig":
+            with open("serverconfig.json", "w") as json_file:
+                json.dump(file, json_file, indent=4)
+            return
+        if json_name == "users":
+            with open("users.json", "w") as json_file:
+                json.dump(file, json_file, indent=4)
+            return
+        if json_name == "languages":
+            with open("languages.json", "w") as json_file:
+                json.dump(file, json_file, indent=4)
+            return
+        if json_name == "reactions":
+            with open("reactions.json", "w") as json_file:
+                json.dump(file, json_file, indent=4)
+            return
+        if json_name == "twitch":
+            with open("twitchconfig.json", "w") as json_file:
+                json.dump(file, json_file, indent=4)
+            return
+
+    except Exception as Error:
+        print(Error)
