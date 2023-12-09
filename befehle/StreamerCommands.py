@@ -21,9 +21,9 @@ class StreamerCommands(discord.app_commands.Group):
             dict.update(new_streamer)
             sjson[str(interaction. guild.id)]["watchlist"] = dict
             utils.savejson(sjson, 'serverconfig')
-            await interaction.response.send_message(content=utils.buildsentence(interaction.guild.id, "done"))
+            await interaction.response.send_message(content="Hinzugefügt!")
         else:
-            await interaction.response.send_message(content=utils.buildsentence(interaction.guild.id, "No_Permission"))
+            await interaction.response.send_message(content="Du hast keine Berechtigung dafür.")
 
 
     @app_commands.command(name="remove", description="remove's a Streamer from the Notification List")
@@ -31,14 +31,14 @@ class StreamerCommands(discord.app_commands.Group):
         if interaction.user.guild_permissions.administrator:
             sjson = utils.serverjson()
             try:
-                del sjson[str(interaction. guild. id)]["watchlist"]["neverseen_minecraft"]
+                del sjson[str(interaction. guild. id)]["watchlist"]["neverseen_tv"]
             except KeyError:
-                await interaction.response.send_message(content=utils.buildsentence(interaction.guild.id, "sremoveerr1", "streamer"))
+                await interaction.response.send_message(content="Dieser Streamer ist nicht Auf der Notification Liste.")
                 return 
             utils.savejson(sjson, 'serverconfig')
-            await interaction.response.send_message(content=utils.buildsentence(interaction.guild.id, "done"))
+            await interaction.response.send_message(content="Entfernt!")
         else:
-            await interaction.response.send_message(content=utils.buildsentence(interaction.guild.id, "No_Permission"))
+            await interaction.response.send_message(content="Du hast keine Berechtigung dafür.")
 
 
     @app_commands.command(name="list", description="Display's a list of the Streamers for this Server")
@@ -47,7 +47,7 @@ class StreamerCommands(discord.app_commands.Group):
         streamer = sjson[str(interaction.guild.id)]["watchlist"]
         user_login = list(streamer.keys())
         p = 0
-        embed = discord.Embed(title=utils.buildsentence(interaction.guild.id, "slistt", "streamer").format(interaction.guild.name), color=0x7A50BE, timestamp=datetime.datetime.now())
+        embed = discord.Embed(title=f"Streamer liste von: {interaction.guild.name}", color=0x7A50BE, timestamp=datetime.datetime.now())
         for i in range(len(user_login)):
             channel = interaction.guild.get_channel(sjson[str(interaction.guild.id)]["watchlist"][user_login[p]]["channel"])
             try:
