@@ -5,6 +5,22 @@ from typing import Any, Literal
 import requests
 from discord import ui
 
+def createAllJsons():
+    requiredFiles = ["config.json", "serverconfig.json", "users.json", "languages.json", "reactions.json", "twitchconfig.json"]
+    for fileName in requiredFiles:
+        try:
+            with open(fileName, 'x') as file:
+                # If successful, the file is created with {} as content
+                file.write("{}")
+                print(f"File {fileName} was created")
+        except FileExistsError:
+            # The File already exists
+            pass
+        except Exception as e:
+            print(f"An error occurred in {fileName} creation: {e}")
+
+createAllJsons()
+
 
 with open("config.json") as file:
     config = json.load(file)
