@@ -21,6 +21,27 @@ def createAllJsons():
 
 createAllJsons()
 
+def checkIfConfigIsComplete():
+    with open("config.json", "r") as file:
+        configuration = json.load(file)
+        configModified = False
+        if not "APP_ID" in configuration:
+            configModified = True
+            appID = input("Please enter your App ID (the ID of your Bot): ")
+            configuration["APP_ID"] = appID
+        if not "TOKEN" in configuration:
+            configModified = True
+            token = input("Please enter your Bot token: ")
+            configuration["TOKEN"] = token
+        if not "TWITCH_URL" in configuration:
+            configModified = True
+            twitchurl = input("Please enter your Twitch URL (if you dont want one, ender 'skip'): ")
+            configuration["TWITCH_URL"] = twitchurl
+        if configModified:
+            with open("config.json", "w") as file:
+                json.dump(configuration, file, indent=4)
+
+checkIfConfigIsComplete()
 
 with open("config.json") as file:
     config = json.load(file)
