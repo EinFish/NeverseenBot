@@ -88,6 +88,8 @@ async def presences():
             await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="dir über die Schulter"))
 
         elif (c == 7):
+            if config["TWITCH_URL"] == "skip":
+                c = 1
             await bot.change_presence(activity=discord.Streaming(name="Neverseen_Minecraft", url=config["TWITCH_URL"]))
 
         c += 1
