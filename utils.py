@@ -5,6 +5,43 @@ from typing import Any, Literal
 import requests
 from discord import ui
 
+def createAllJsons():
+    requiredFiles = ["config.json", "serverconfig.json", "users.json", "languages.json", "reactions.json", "twitchconfig.json"]
+    for fileName in requiredFiles:
+        try:
+            with open(fileName, 'x') as file:
+                # If successful, the file is created with {} as content
+                file.write("{}")
+                print(f"File {fileName} was created")
+        except FileExistsError:
+            # The File already exists
+            pass
+        except Exception as e:
+            print(f"An error occurred in {fileName} creation: {e}")
+
+createAllJsons()
+
+def checkIfConfigIsComplete():
+    with open("config.json", "r") as file:
+        configuration = json.load(file)
+        configModified = False
+        if not "APP_ID" in configuration:
+            configModified = True
+            appID = input("Please enter your App ID (the ID of your Bot): ")
+            configuration["APP_ID"] = appID
+        if not "TOKEN" in configuration:
+            configModified = True
+            token = input("Please enter your Bot token: ")
+            configuration["TOKEN"] = token
+        if not "TWITCH_URL" in configuration:
+            configModified = True
+            twitchurl = input("Please enter your Twitch URL (if you dont want one, ender 'skip'): ")
+            configuration["TWITCH_URL"] = twitchurl
+        if configModified:
+            with open("config.json", "w") as file:
+                json.dump(configuration, file, indent=4)
+
+checkIfConfigIsComplete()
 
 with open("config.json") as file:
     config = json.load(file)
