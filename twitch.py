@@ -3,7 +3,7 @@ import requests
 import utils
 import datetime
 
-with open("config.json") as file:
+with open("twitchconfig.json") as file:
     config = json.load(file)
 
 
