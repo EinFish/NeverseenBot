@@ -50,8 +50,8 @@ async def check_twitch_online_streamers():
             notification["game_name"], notification["language"], notification["viewer_count"]), value="{}".format(tags))
         embed.set_image(url=image)
         for server in sjson:
-            ping = sjson[server]["watchlist"][notification["user_login"]]["ping"]
             try:
+                ping = sjson[server]["watchlist"][notification["user_login"]]["ping"]
                 channel = bot.get_channel(
                     sjson[server]["watchlist"][notification["user_login"]]["channel"])
             except KeyError:
