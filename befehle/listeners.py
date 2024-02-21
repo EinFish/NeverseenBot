@@ -24,21 +24,24 @@ class Automod(commands.Cog):
         with open("serverconfig.json") as file:
             sjson = json.load(file)
         guildid = after.guild.id
-        if not before.author.bot:
-            try:
-                channel = after.guild.get_channel(
-                    int(sjson[str(guildid)]["logchannel"]))
-                embed = discord.Embed(title="Nachricht bearbeitet", description="eine nachricht von " +
-                                      before.author.name + " wurde bearbeitet.", color=0x0094ff, timestamp=datetime.datetime.now())
-                embed.add_field(
-                    name="Vorher:", value=before.content, inline=True)
-                embed.add_field(name="Nachher:",
-                                value=after.content, inline=True)
-                embed.add_field(name="Channel:",
-                                value=after.jump_url, inline=True)
-                await channel.send(embed=embed)
-            except KeyError:
-                pass
+        if before == after:
+            return
+        if before.author.bot:
+            return
+        try:
+            channel = after.guild.get_channel(
+                int(sjson[str(guildid)]["logchannel"]))
+            embed = discord.Embed(title="Nachricht bearbeitet", description="eine nachricht von " +
+                                    before.author.name + " wurde bearbeitet.", color=0x0094ff, timestamp=datetime.datetime.now())
+            embed.add_field(
+                name="Vorher:", value=before.content, inline=True)
+            embed.add_field(name="Nachher:",
+                            value=after.content, inline=True)
+            embed.add_field(name="Channel:",
+                            value=after.jump_url, inline=True)
+            await channel.send(embed=embed)
+        except KeyError:
+            pass
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):

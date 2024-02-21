@@ -37,7 +37,7 @@ class YoutubeCommands(discord.app_commands.Group):
         for i in list(yt.values()):
             name = i["url"].split("@")[1]
             url = i["url"]
-            ping = interaction.guild.get_role(i["ping"]).mention if i["ping"] != "" else "None"
+            ping = interaction.guild.get_role(int(i["ping"])).mention if i["ping"] != "" else "None"
             kanal = await interaction.guild.fetch_channel(i["kanal"])
             embed.add_field(name=f"Youtube Kanal: {name}\n({url})\n", value=f"Discord Kanal: {kanal.mention}\nRolle: {ping}", inline=False)
 
