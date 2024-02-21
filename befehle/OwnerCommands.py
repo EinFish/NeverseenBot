@@ -28,7 +28,7 @@ class OwnerCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        status.start(self)
+       # status.start(self)
         print("OwnerCommands Geladen!")
 
     @commands.command()
@@ -61,7 +61,7 @@ class OwnerCog(commands.Cog):
         if ctx.author.id not in id:
             await ctx.send("Das solltest du besser lassen :)")
             return
-        status.start(self)
+      #  status.start(self)
         await ctx.send("Loop Started")
 
 

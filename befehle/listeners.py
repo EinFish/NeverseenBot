@@ -102,7 +102,7 @@ class Automod(commands.Cog):
         with open("serverconfig.json") as file:
             sjson = json.load(file)
         guildid = guild.id
-        sjson[str(guildid)] = {"name": guild.name, "watchlist": {}}
+        sjson[str(guildid)] = {"name": guild.name, "watchlist": {}, "youtuber": {}}
 
         with open("serverconfig.json", "w") as json_file:
             json.dump(sjson, json_file, indent=4)
