@@ -52,16 +52,19 @@ async def check_twitch_online_streamers():
         for server in sjson:
             try:
                 ping = sjson[server]["watchlist"][notification["user_login"]]["ping"]
-                channel = bot.get_channel(
-                    sjson[server]["watchlist"][notification["user_login"]]["channel"])
             except KeyError:
                 pass
+            try:
+                channel = bot.get_channel(
+                    sjson[server]["watchlist"][notification["user_login"]]["channel"])
+            except:
+                continue
             try:
                 content = channel.guild.get_role(ping).mention
             except:
                 content = None
             if not channel:
-                pass
+                continue
             await channel.send(embed=embed, content=content)
 
 
