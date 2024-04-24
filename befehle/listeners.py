@@ -24,7 +24,7 @@ class Automod(commands.Cog):
         with open("serverconfig.json") as file:
             sjson = json.load(file)
         guildid = after.guild.id
-        if before == after:
+        if before.content == after.content:
             return
         if before.author.bot:
             return
@@ -39,12 +39,24 @@ class Automod(commands.Cog):
                             value=after.content, inline=True)
             embed.add_field(name="Channel:",
                             value=after.jump_url, inline=True)
+            liste = []
+            liste2 = []
+            for i in after.attachments:
+                liste.append(i.content_type)
+                liste.append(i.id)
+                liste.append(i.url)
+            for i in after.embeds:
+                liste2.append(i.to_dict())
+            embed.add_field(name="Attachment:",
+                            value=liste, inline=True)
+            embed.add_field(name="Embed:",
+                            value=liste2, inline=True)
             await channel.send(embed=embed)
         except KeyError:
             pass
 
     @commands.Cog.listener()
-    async def on_message_delete(self, message):
+    async def on_message_delete(self, message: discord.Message):
         with open("serverconfig.json") as file:
             sjson = json.load(file)
 
@@ -58,6 +70,18 @@ class Automod(commands.Cog):
                             value=message.content, inline=True)
             embed.add_field(name="Channel:",
                             value=message.channel.jump_url, inline=True)
+            liste = []
+            liste2 = []
+            for i in message.attachments:
+                liste.append(i.content_type)
+                liste.append(i.id)
+                liste.append(i.url)
+            for i in message.embeds:
+                liste2.append(i.to_dict())
+            embed.add_field(name="Attachment:",
+                            value=liste, inline=True)
+            embed.add_field(name="Embed:",
+                            value=liste2, inline=True)
             await channel.send(embed=embed)
         except KeyError:
             pass

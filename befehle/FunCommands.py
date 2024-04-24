@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands, ui
 import json
-from typing import Literal
+from typing import Literal, Union
 import datetime
 import utils
 
@@ -137,6 +137,16 @@ class Fun(discord.app_commands.Group):
                 await interaction.edit_original_response(embed=embed2, view=None)
     except Exception as error:
         errormessage()
+
+
+    @app_commands.command(name="oneword", description="Setzt den Kanal für OneWord")
+    async def oneworrd(self, interaction: discord.Interaction, channel: Union[discord.TextChannel, discord.Thread]):
+        if not interaction.user.guild_permissions.administrator:
+            return await interaction.response.send_message(content="Dir fehlen bestimmte Rechte dafür.")
+        sjson = utils.serverjson()
+        sjson[str(interaction.guild.id)]["oneword"] = channel.id
+        utils.savejson(sjson, 'serverconfig')
+        await interaction.response.send_message("Erfolg!", ephemeral=True)
 
 
 class FunCog(commands.Cog):
