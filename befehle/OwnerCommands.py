@@ -13,13 +13,17 @@ with open("config.json") as file:
 
 @loop(seconds=10)
 async def status(self):
-    bot = self.bot
-    member = bot.get_guild(1063567516737224805).get_member(959798444195721226)
-    role = bot.get_guild(1063567516737224805).get_role(1086378080311972001)
-    if str(member.status) == "offline":
-        channel = await bot.fetch_channel(1086735918494404651)
-        await channel.send(f"{role.mention} Gyra ist Offline!")
-        status.stop()
+    try:
+        bot = self.bot
+        member = bot.get_guild(1063567516737224805).get_member(959798444195721226)
+        role = bot.get_guild(1063567516737224805).get_role(1086378080311972001)
+        if str(member.status) == "offline":
+            channel = await bot.fetch_channel(1086735918494404651)
+            await channel.send(f"{role.mention} Gyra ist Offline!")
+            status.stop()
+    except:
+        pass
+
 
 
 class OwnerCog(commands.Cog):

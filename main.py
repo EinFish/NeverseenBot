@@ -1,3 +1,5 @@
+import signal
+import sys
 import discord
 import datetime
 import time
@@ -17,8 +19,13 @@ with open("config.json", "r") as file:
 bot = commands.Bot("neverseen.", intents=discord.Intents.all(),
                    application_id=config["APP_ID"])
 
+def graceful_shutdown(signum, frame):
+    print("Stopped Bot!")
+    exit(0)
 
 if __name__ == "__main__":
+    # Register the signal handler
+    signal.signal(signal.SIGINT, graceful_shutdown)
     print(discord.__version__)
     for extension in os.listdir(os.fsencode("befehle")):
         if os.fsdecode(extension).endswith(".py"):
@@ -29,7 +36,6 @@ if __name__ == "__main__":
                 print(
                     f"Die extension {os.fsdecode(extension)[:-3]} konnte nicht geladen werden.")
                 raise
-
 
 @loop(seconds=90)
 async def check_twitch_online_streamers():
@@ -68,36 +74,34 @@ async def check_twitch_online_streamers():
             await channel.send(embed=embed, content=content)
 
 
+bot_presences: list[discord.BaseActivity] = [
+    discord.Game(name="die Konsole durch"),
+    discord.Game(name="bald Musik"),
+    discord.Activity(type=discord.ActivityType.watching, name="dir über die Schulter"),
+    discord.Activity(type=discord.ActivityType.listening, name="guter Musik"),
+    discord.Activity(type=discord.ActivityType.watching, name="dem Chat zu"),
+    discord.Activity(type=discord.ActivityType.watching, name="dir über die Schulter")
+]
+
+if (config["TWITCH_URL"] != "skip"):
+    bot_presences.append(discord.Streaming(name="Neverseen_Minecraft", url=config["TWITCH_URL"]))
+
 @loop(seconds=10)
 async def presences():
-    c = 1
+    print("called")
+    current_presences_index = 0
     while (True):
-        if (c == 1):
-            await bot.change_presence(activity=discord.Game(name="die Konsole durch"))
+        if (current_presences_index < 7):
+            await bot.change_presence(activity=bot_presences[current_presences_index])
 
-        elif (c == 2):
-            await bot.change_presence(activity=discord.Game(name="bald Musik"))
-
-        elif (c == 3):
-            await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="dir über die Schulter"))
-
-        elif (c == 4):
-            await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="guter Musik"))
-
-        elif (c == 5):
-            await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="dem Chat zu"))
-
-        elif (c == 6):
-            await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="dir über die Schulter"))
-
-        elif (c == 7):
+        elif (current_presences_index == 7):
             if config["TWITCH_URL"] == "skip":
-                c = 1
-            await bot.change_presence(activity=discord.Streaming(name="Neverseen_Minecraft", url=config["TWITCH_URL"]))
+                current_presences_index = 1
+            await bot.change_presence(activity=bot_presences[current_presences_index])
 
-        c += 1
-        if (c > 7):
-            c = 1
+        current_presences_index += 1
+        if (current_presences_index > 7):
+            current_presences_index = 1
         await asyncio.sleep(30)
 
 

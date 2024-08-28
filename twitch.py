@@ -3,14 +3,12 @@ import requests
 import utils
 import datetime
 
-with open("twitchconfig.json") as file:
-    config = json.load(file)
-
+twitchConfig = utils.twitchconfig()
 
 def get_app_access_token():
     params = {
-        "client_id": config["client_id"],
-        "client_secret": config["client_secret"],
+        "client_id": twitchConfig["client_id"],
+        "client_secret": twitchConfig["client_secret"],
         "grant_type": "client_credentials"
     }
 
@@ -27,8 +25,8 @@ def get_users(login_names):
     }
 
     headers = {
-        "Authorization": "Bearer {}".format(config["access_token"]),
-        "Client-Id": config["client_id"]
+        "Authorization": "Bearer {}".format(twitchConfig["access_token"]),
+        "Client-Id": twitchConfig["client_id"]
     }
 
     response = requests.get(
@@ -42,8 +40,8 @@ def get_streams(users):
     }
 
     headers = {
-        "Authorization": "Bearer {}".format(config["access_token"]),
-        "Client-Id": config["client_id"]
+        "Authorization": "Bearer {}".format(twitchConfig["access_token"]),
+        "Client-Id": twitchConfig["client_id"]
     }
 
     response = requests.get(
@@ -53,23 +51,26 @@ def get_streams(users):
 
 online_users = {}
 
-
 def get_notifications():
-    list = []
-    sjson = utils.twitchconfig()
+    watchlist = []
 
-    for i in sjson["watchlist"]:
+    if ("watchlist" not in twitchConfig):
+        return []
+
+    raw_watchlist = twitchConfig["watchlist"]
+
+    # filter watchlist for duplicates
+    for i in raw_watchlist:
         if i in list:
             pass
         else:
             list.append(i)
 
-    users = get_users(list)
-    streams = get_streams(users)
+    streams = get_streams(get_users(list))
 
     notifications = []
 
-    for user_name in config["watchlist"]:
+    for user_name in watchlist:
         if user_name not in online_users:
             online_users[user_name] = datetime.datetime.utcnow()
 
