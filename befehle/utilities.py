@@ -1,9 +1,9 @@
 import discord
 from discord.ext import commands
 from discord import app_commands, ui
-from googletrans import Translator
+#from googletrans import Translator
 import json
-import googletrans
+#import googletrans
 from utils import EmbedBuilder
 import datetime
 
@@ -21,7 +21,7 @@ class bugReportModal(ui.Modal, title="Bugreport"):
                          style=discord.TextStyle.long, placeholder="", required=False, max_length=1024)
 
     async def on_submit(self, interaction) -> None:
-        with open('config.json') as file:
+        with open('../config.json') as file:
             config = json.load(file)
         recivers = config["OWNER_ID"]
         for reciver in recivers:
@@ -37,7 +37,7 @@ class Utilities(discord.app_commands.Group):
     @app_commands.command(name="blacklist", description="blackliste einen user")
     @app_commands.checks.cooldown(1, 20)
     async def blacklist(self, interaction, user: discord.Member, blacklist: bool):
-        with open('config.json') as file:
+        with open('../config.json') as file:
             config = json.load(file)
         with open("users.json") as file:
             ujson = json.load(file)
@@ -76,22 +76,22 @@ class Utilities(discord.app_commands.Group):
         else:
             await interaction.response.send_message(content="Du hast keine Berechtigung dafür.", ephemeral=True)
 
-    @app_commands.command(name="translate", description="Translates a Sentence")
-    async def translate(self, interacion: discord.Interaction, lang: app_commands.Range[str, 2, 20], sentence: str):
-        if not lang.lower() in googletrans.LANGCODES.values():
-            if not lang.lower() in googletrans.LANGCODES.keys():
-                await interacion.response.send_message(content="Translation Failed!\nThe target language must be a real Language.", ephemeral=True)
-                return
-        t = Translator()
-        a = t.translate(text=sentence, dest=lang)
-        detected_lang = t.detect(sentence)
-        lang_str = str(detected_lang.lang.capitalize())
-        embed = discord.Embed(title="Translator",
-                              timestamp=datetime.datetime.now(), color=0x7A50BE, description=f"Detected: {lang_str.lower()}")
-        embed.add_field(name="Translated Text:", value=a.text, inline=False)
-        embed.add_field(name="Original Text:", value=sentence, inline=False)
-        embed.set_footer(text="Translated via Google")
-        await interacion.response.send_message(embed=embed)
+    # @app_commands.command(name="translate", description="Translates a Sentence")
+    # async def translate(self, interacion: discord.Interaction, lang: app_commands.Range[str, 2, 20], sentence: str):
+    #     if not lang.lower() in googletrans.LANGCODES.values():
+    #         if not lang.lower() in googletrans.LANGCODES.keys():
+    #             await interacion.response.send_message(content="Translation Failed!\nThe target language must be a real Language.", ephemeral=True)
+    #             return
+    #     t = Translator()
+    #     a = t.translate(text=sentence, dest=lang)
+    #     detected_lang = t.detect(sentence)
+    #     lang_str = str(detected_lang.lang.capitalize())
+    #     embed = discord.Embed(title="Translator",
+    #                           timestamp=datetime.datetime.now(), color=0x7A50BE, description=f"Detected: {lang_str.lower()}")
+    #     embed.add_field(name="Translated Text:", value=a.text, inline=False)
+    #     embed.add_field(name="Original Text:", value=sentence, inline=False)
+    #     embed.set_footer(text="Translated via Google")
+    #     await interacion.response.send_message(embed=embed)
 
 
 
