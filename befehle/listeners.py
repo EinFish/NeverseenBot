@@ -6,6 +6,7 @@ import json
 import sys
 import time
 
+import utils
 
 with open("reactions.json") as file:
     rjson = json.load(file)
@@ -297,6 +298,39 @@ class Automod(commands.Cog):
                 await logchannel.send(content="Willkommensnachrichten nicht eingerichtet!")
             except:
                 pass
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_remove(self, reaction: discord.RawReactionActionEvent):
+        guild: discord.Guild = await self.bot.fetch_guild(reaction.guild_id)
+        sjson = utils.serverjson()
+
+        member = await guild.fetch_member(reaction.user_id)
+
+        reactionRoleSystem = sjson[str(guild.id)]["reactionroles"][str(reaction.message_id)]
+        for role in reactionRoleSystem:
+            # role = {"emojiID": {"text": role_id}}
+            if list(role.keys())[0] == str(reaction.emoji.id):
+                role_id = list(list(role.values())[0].values())[0]
+                break
+
+        role = guild.get_role(role_id)
+        await member.remove_roles(role, reason=f"ReactionRole System (msgID: {reaction.message_id})")
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, reaction: discord.RawReactionActionEvent):
+        guild: discord.Guild = await self.bot.fetch_guild(reaction.guild_id)
+        sjson = utils.serverjson()
+
+        reactionRoleSystem = sjson[str(guild.id)]["reactionroles"][str(reaction.message_id)]
+        for role in reactionRoleSystem:
+            # role = {"emojiID": {"text": role_id}}
+            if list(role.keys())[0] == str(reaction.emoji.id):
+                role_id = list(list(role.values())[0].values())[0]
+                break
+
+        role = guild.get_role(role_id)
+        await reaction.member.add_roles(role, reason=f"ReactionRole System (msgID: {reaction.message_id})")
+
 
 
 async def setup(bot):

@@ -10,6 +10,65 @@ from typing import Union, Any
 import utils
 
 
+async def get_rrList(interaction, message_id, reactionList = None):
+
+	if not reactionList:
+		sjson = utils.serverjson()
+		try:
+			reactionList = sjson[str(interaction.guild_id)]["reactionroles"][message_id]
+		except KeyError:
+			return await interaction.response.send_message("ReactionRole System nicht gefunden", ephemeral=True)
+
+	final_reaactrolesStr = ""
+	# i = {"emojiID": {"Name": 12335345}} "mond: asd (role.mention)" reactionList
+	# i = {"messageID": {"emojiID": {"Name": 12335345}}} "mond: asd (role.mention)" is nicht
+	count = 1
+	for i in reactionList:
+		emoji: discord.Emoji = await interaction.guild.fetch_emoji(list(i)[0])
+
+		name_und_id = list(i.values())[0]
+		name, role_id = next(iter(name_und_id.items()))
+
+		role = interaction.guild.get_role(role_id)
+
+		final_reaactrolesStr = final_reaactrolesStr + f"### ({count}) <:{emoji.name}:{emoji.id}> · {name} ({role.mention})\n"
+		count+=1
+
+	embed = discord.Embed(title="ReactionRoles System bearbeiten",
+						  description=f"Momentaner Stand:\n\n{final_reaactrolesStr}", color=0x0094ff)
+
+	# message = await interaction.channel.fetch_message(int(message_id))
+	# channel = message.channel
+
+	return embed
+
+
+
+class deleteModal(discord.ui.Modal):
+	def __init__(self, channel, message_id):
+		self.channel = channel
+		self.message_id = message_id
+		super().__init__(title="ReactionRole eintrag entfernen")
+
+	id_field = discord.ui.TextInput(label="ID des Eintrags", style=discord.TextStyle.short, max_length=2, placeholder="Die ID, die vor dem Eintrag steht", required=True)
+
+	async def on_submit(self, interaction: discord.Interaction) -> None:
+		sjson = utils.serverjson()
+		try:
+			self.id_field = int(str(self.id_field)) -1
+		except Exception as e:
+			print(e)
+			return await interaction.response.send_message("Ungültiger Wert", ephemeral=True)
+
+		reactionList = sjson[str(interaction.guild_id)]["reactionroles"][self.message_id]
+		del reactionList[self.id_field]
+		utils.savejson(sjson, "serverconfig")
+
+		embed = await get_rrList(interaction, self.message_id)
+
+		return await interaction.response.edit_message(embed=embed, view=bearbeitenView(self.channel, reactionList, self.message_id))
+
+
 class bearbeitenView(discord.ui.View):
 	def __init__(self, channel, reactionList, message_id):
 		self.channel = channel
@@ -34,7 +93,7 @@ class bearbeitenButtonFinish(discord.ui.Button):
 
 		# drei buttons, Änderungen speichern, Rolle hinzufügen, Rolle entfernen
 		# ReactionRole Message bearbeiten oder neu erstellen
-		final_embed_description: str = ""
+		final_embed_description: str = ">>> "
 		emojiList: list = []
 		for item in self.reactionList:
 			emoji: discord.Emoji = await interaction.guild.fetch_emoji(list(item)[0])
@@ -44,7 +103,7 @@ class bearbeitenButtonFinish(discord.ui.Button):
 
 			role = interaction.guild.get_role(role_id)
 
-			final_embed_description += f"<:{emoji.name}:{emoji.id}> · {name}\n"
+			final_embed_description += f"### <:{emoji.name}:{emoji.id}> · {name}\n"
 
 
 		embed = discord.Embed(title="Reagiert auf die Nachricht um folgende Rollen zu bekommen!", description=final_embed_description, color=0x0094ff)
@@ -72,6 +131,8 @@ class bearbeitenButtonFinish(discord.ui.Button):
 
 class bearbeitenButtonDelete(discord.ui.Button):
 	def __init__(self, text, channel, reactionList, message_id):
+		self.channel = channel
+		self.message_id = message_id
 		super().__init__(label=text, style=discord.ButtonStyle.danger, emoji="➖")
 
 	async def callback(self, interaction: discord.Interaction) -> Any:
@@ -79,7 +140,7 @@ class bearbeitenButtonDelete(discord.ui.Button):
 		# drei buttons, Änderungen speichern, Rolle hinzufügen, Rolle entfernen
 		# modal öffnen, wo man ID eingibt
 
-		return await interaction.response.send_message("Link im Browser geöffnet", ephemeral=True)
+		return await interaction.response.send_modal(deleteModal(self.channel, self.message_id))
 
 
 class bearbeitenButtonAdd(discord.ui.Button):
@@ -122,38 +183,7 @@ class checkButtonsAccept(discord.ui.Button):
 
 		# drei buttons, Änderungen speichern, Rolle hinzufügen, Rolle entfernen
 
-
-
-
-		# sjson = utils.serverjson()
-		# try:
-		# 	sjson[interaction.guild_id]["reactionroles"] = self.reactionList
-		# except KeyError:
-		# 	sjson[interaction.guild_id] = {
-		# 		"reactionroles": self.reactionList
-		# 	}
-		# utils.savejson(sjson, "serverconfig")
-
-		final_reaactrolesStr = ""
-		# i = {"emojiID": {"Name": 12335345}} "mond: asd (role.mention)" reactionList
-		# i = {"messageID": {"emojiID": {"Name": 12335345}}} "mond: asd (role.mention)" is nicht
-		for i in self.reactionList:
-			print(i, type(i))
-			print(i.keys())
-			print(i.values())
-			emoji: discord.Emoji = await interaction.guild.fetch_emoji(list(i)[0])
-
-			name_und_id = list(i.values())[0]
-			name, role_id = next(iter(name_und_id.items()))
-
-			role = interaction.guild.get_role(role_id)
-
-			final_reaactrolesStr = final_reaactrolesStr + f"<:{emoji.name}:{emoji.id}> · {name} ({role.mention})\n"
-			print(final_reaactrolesStr)
-
-
-		embed = discord.Embed(title="ReactionRoles System bearbeiten", description=f"Momentaner Stand:\n\n{final_reaactrolesStr}", color=0x0094ff)
-
+		embed = await get_rrList(interaction, self.message_id, self.reactionList)
 
 
 		return await interaction.response.edit_message(embed=embed, view= bearbeitenView(self.channel, self.reactionList, self.message_id))
@@ -190,14 +220,10 @@ class linkRoleSelect(discord.ui.Select):
 		embed = discord.Embed(title="Bestätigen und Hinzufügen", description="Sind Diese Informationen Korrekt?", color=0x0094ff, timestamp=datetime.datetime.now())
 
 		role = interaction.guild.get_role(int(self.values[0]))
-		print(interaction.guild.emojis)
 		emojistr = "😃"
 		for emoji in interaction.guild.emojis:
-			print(self.emoji)
 			self.emoji = str(self.emoji).replace(":", "")
-			print(emoji.name)
 			if emoji.name == self.emoji:
-				print("eeezz")
 				emojistr = f"<:{emoji.name}:{emoji.id}>"
 				break
 
@@ -232,11 +258,8 @@ class reactionCreateModal(discord.ui.Modal):
 
 		emojistr = "😃"
 		for emoji in interaction.guild.emojis:
-			print(self.emoji)
 			self.emoji = str(self.emoji).replace(":", "")
-			print(emoji.name)
 			if emoji.name == self.emoji:
-				print("eeezz")
 				emojistr = f"<:{emoji.name}:{emoji.id}>"
 
 		embed = discord.Embed(title="Rolle verlinken", description=f"Wähle eine Rolle aus für das die erste Rolle:\n{emojistr}: {self.name}", color=0x0094ff, timestamp=datetime.datetime.now())
@@ -249,11 +272,9 @@ class reactionCreateModal(discord.ui.Modal):
 				discord.SelectOption(label=role.name, value=role.id)
 			)
 
-		print(options)
 		try:
 			await interaction.response.edit_message(embed=embed, view=linkRoleView(options, self.emoji, self.name, self.reactionList, self.channel, self.message_id))
 		except discord.NotFound:
-			#print(e)
 			await interaction.response.send_message(embed=embed, view=linkRoleView(options, self.emoji, self.name, self.reactionList, self.channel, self.message_id))
 
 
@@ -290,38 +311,24 @@ class reactionCommands(discord.app_commands.Group):
 		except KeyError:
 			return await interaction.response.send_message("ReactionRole System nicht gefunden", ephemeral=True)
 
-		final_reaactrolesStr = ""
-		# i = {"emojiID": {"Name": 12335345}} "mond: asd (role.mention)" reactionList
-		# i = {"messageID": {"emojiID": {"Name": 12335345}}} "mond: asd (role.mention)" is nicht
-		for i in reactionList:
-			print(i, type(i))
-			print(i.keys())
-			print(i.values())
-			emoji: discord.Emoji = await interaction.guild.fetch_emoji(list(i)[0])
 
-			name_und_id = list(i.values())[0]
-			name, role_id = next(iter(name_und_id.items()))
+		embed = await get_rrList(interaction, message_id)
 
-			role = interaction.guild.get_role(role_id)
-
-			final_reaactrolesStr = final_reaactrolesStr + f"<:{emoji.name}:{emoji.id}> · {name} ({role.mention})\n"
-			print(final_reaactrolesStr)
-
-		embed = discord.Embed(title="ReactionRoles System bearbeiten",
-							  description=f"Momentaner Stand:\n\n{final_reaactrolesStr}", color=0x0094ff)
-
-		# message = await interaction.channel.fetch_message(int(message_id))
-		# channel = message.channel
-
-		return await interaction.response.send_message(embed=embed, view=bearbeitenView(channel, reactionList,
-																						message_id))
-
+		return await interaction.response.send_message(embed=embed, view=bearbeitenView(channel, reactionList, message_id))
 
 
 	@app_commands.command(name="entfernen", description="Lösche ein ReactionRole System")
-	async def delete(self, interaction: discord.Interaction, message_id: int):
+	async def delete(self, interaction: discord.Interaction, message_id: str, channel: Union[discord.TextChannel, discord.Thread, discord.ForumChannel]):
 		if not interaction.user.guild_permissions.manage_roles:
 			return await interaction.response.send_message("Du hast keine Berechtigung dazu", ephemeral=True)
+
+		sjson = utils.serverjson()
+		del sjson[str(interaction.guild_id)]["reactionroles"][str(message_id)]
+		message: discord.Message = await channel.fetch_message(message_id)
+		await message.delete()
+		utils.savejson(sjson, "serverconfig")
+
+		return await interaction.response.send_message("ReactionRoles System gelöscht.", ephemeral=True)
 
 
 class reactionCog(commands.Cog):
