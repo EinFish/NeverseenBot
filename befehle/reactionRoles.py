@@ -159,9 +159,12 @@ class bearbeitenButtonAdd(discord.ui.Button):
 
 
 class linkRoleView(discord.ui.View):
-	def __init__(self, roles, emoji, name, reactionList, channel, message_id):
+	def __init__(self, roles, emoji, name, reactionList, channel, message_id, options2):
 		super().__init__(timeout=None)
 		self.add_item(linkRoleSelect(roles, emoji, name, reactionList, channel, message_id))
+		if options2:
+			self.add_item(linkRoleSelect2(options2, emoji, name, reactionList, channel, message_id))
+
 
 
 class checkView(discord.ui.View):
@@ -227,6 +230,8 @@ class linkRoleSelect(discord.ui.Select):
 				emojistr = f"<:{emoji.name}:{emoji.id}>"
 				break
 
+		if emojistr == "😃": emojistr = str(self.emoji)
+
 		if "@role" in str(self.name):
 			self.name = str(self.name).replace("@role", role.mention)
 
@@ -243,6 +248,56 @@ class linkRoleSelect(discord.ui.Select):
 		# self.reactionList[self.message_obj.id] = {}
 
 		await interaction.response.edit_message(embed=embed, view=checkView(self.reactionList, self.channel, self.message_id))
+
+
+
+class linkRoleSelect2(discord.ui.Select):
+	def __init__(self, options, emoji, name, reactionList, channel, message_id = None):
+		self.emoji = emoji
+		self.name = name
+		self.reactionList = reactionList
+		self.appendList = []
+		self.channel = channel
+		self.message_id = message_id
+		#self.options = options
+		super().__init__(placeholder="Auswählen einer Rolle..",
+						 max_values=1, min_values=1, options=options)
+
+
+	async def callback(self, interaction: discord.Interaction) -> Any:
+
+		embed = discord.Embed(title="Bestätigen und Hinzufügen", description="Sind Diese Informationen Korrekt?", color=0x0094ff, timestamp=datetime.datetime.now())
+
+		role = interaction.guild.get_role(int(self.values[0]))
+		emojistr = "😃"
+		for emoji in interaction.guild.emojis:
+			self.emoji = str(self.emoji).replace(":", "")
+			if emoji.name == self.emoji:
+				emojistr = f"<:{emoji.name}:{emoji.id}>"
+				break
+
+		if emojistr == "😃": emojistr = str(self.emoji)
+
+		if "@role" in str(self.name):
+			self.name = str(self.name).replace("@role", role.mention)
+
+		embed.add_field(name="Emoji und Name:", value=f"{emojistr}: {self.name}", inline=False)
+		embed.add_field(name="Damit verlinkte Rolle:", value=role.mention, inline=False)
+
+		# if self.message_obj == None:
+		# 	reactionRolesEmbed = discord.Embed(title="Reaction Roles", description="Reagiere mit dem jeweiligen Emoji, um die Rolle zu bekommen.\n", color=0x0094ff)
+		#
+		# 	self.message_obj = await self.channel.send(embed=reactionRolesEmbed)
+
+		self.reactionList.append({str(emoji.id): {str(self.name): role.id}})
+
+		# self.reactionList[self.message_obj.id] = {}
+
+		await interaction.response.edit_message(embed=embed, view=checkView(self.reactionList, self.channel, self.message_id))
+
+
+
+
 
 class reactionCreateModal(discord.ui.Modal):
 	def __init__(self, channel, reactionList, message_id) -> None:
@@ -261,24 +316,31 @@ class reactionCreateModal(discord.ui.Modal):
 			self.emoji = str(self.emoji).replace(":", "")
 			if emoji.name == self.emoji:
 				emojistr = f"<:{emoji.name}:{emoji.id}>"
+		if emojistr == "😃": emojistr = str(self.emoji)
+
 
 		embed = discord.Embed(title="Rolle verlinken", description=f"Wähle eine Rolle aus für das die erste Rolle:\n{emojistr}: {self.name}", color=0x0094ff, timestamp=datetime.datetime.now())
 
 		options = []
+		options2 = []
 		for role in interaction.guild.roles:
 			#options.append(role)
+			if len(options) >= 25:
+				options2.append(
+				discord.SelectOption(label=role.name, value=role.id))
 
-			options.append(
-				discord.SelectOption(label=role.name, value=role.id)
-			)
-			if len(options) == 25:
-				break
+			else:
+				options.append(
+					discord.SelectOption(label=role.name, value=role.id)
+				)
+
+
 
 
 		try:
-			await interaction.response.edit_message(embed=embed, view=linkRoleView(options, self.emoji, self.name, self.reactionList, self.channel, self.message_id))
+			await interaction.response.edit_message(embed=embed, view=linkRoleView(options, self.emoji, self.name, self.reactionList, self.channel, self.message_id, options2))
 		except discord.NotFound:
-			await interaction.response.send_message(embed=embed, view=linkRoleView(options, self.emoji, self.name, self.reactionList, self.channel, self.message_id))
+			await interaction.response.send_message(embed=embed, view=linkRoleView(options, self.emoji, self.name, self.reactionList, self.channel, self.message_id, options2))
 
 
 
