@@ -271,6 +271,9 @@ class reactionCreateModal(discord.ui.Modal):
 			options.append(
 				discord.SelectOption(label=role.name, value=role.id)
 			)
+			if len(options) == 25:
+				break
+
 
 		try:
 			await interaction.response.edit_message(embed=embed, view=linkRoleView(options, self.emoji, self.name, self.reactionList, self.channel, self.message_id))
@@ -291,7 +294,7 @@ class reactionCommands(discord.app_commands.Group):
 #	delete Command, der die ReactionRoles entfernt
 #
 
-	@app_commands.command(name="erstellen", description="aaaaaaaaaaaaaaaaaaaa")
+	@app_commands.command(name="erstellen", description="Erstellt ein neues ReactionRoles System")
 	async def create(self, interaction: discord.Interaction, channel: Union[discord.TextChannel, discord.Thread, discord.ForumChannel]):
 		if not interaction.user.guild_permissions.manage_roles:
 			return await interaction.response.send_message("Du hast keine Berechtigung dazu", ephemeral=True)
@@ -300,7 +303,7 @@ class reactionCommands(discord.app_commands.Group):
 
 		await interaction.response.send_modal(reactionCreateModal(channel, reactionList, None))
 
-	@app_commands.command(name="bearbeiten", description="aaaaaaaaaaaaaa")
+	@app_commands.command(name="bearbeiten", description="Bearbeitet ein vorhandenes ReactionRole System")
 	async def edit(self, interaction: discord.Interaction, message_id: str, channel: Union[discord.TextChannel, discord.Thread, discord.ForumChannel]):
 		if not interaction.user.guild_permissions.manage_roles:
 			return await interaction.response.send_message("Du hast keine Berechtigung dazu", ephemeral=True)
