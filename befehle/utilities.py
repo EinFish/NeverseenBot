@@ -1,3 +1,5 @@
+from typing import Union
+
 import discord
 from discord.ext import commands
 from discord import app_commands, ui
@@ -92,6 +94,16 @@ class Utilities(discord.app_commands.Group):
     #     embed.add_field(name="Original Text:", value=sentence, inline=False)
     #     embed.set_footer(text="Translated via Google")
     #     await interacion.response.send_message(embed=embed)
+
+
+
+    @app_commands.command(name="edit-embed", description="bearbeite ein Existierendes Embed")
+    async def edit_embed(self, interaction: discord.Interaction, messageid: str, channel: Union[discord.TextChannel, discord.Thread, discord.ForumChannel]):
+        if not interaction.user.guild_permissions.manage_roles:
+            await interaction.response.send_message(content="Du hast keine Berechtigung dafür.", ephemeral=True)
+
+        await interaction.response.send_modal(EmbedBuilder(channel=channel, timestamp=False, i=interaction, thumb=None, mode="edit", messageid=messageid))
+
 
 
 

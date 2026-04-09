@@ -284,11 +284,13 @@ class EmbedBuilderView(discord.ui.View):
 
 
 class EmbedBuilder(discord.ui.Modal):
-    def __init__(self, channel, timestamp, i, thumb) -> None:
+    def __init__(self, channel: discord.TextChannel, timestamp, i, thumb, mode=None, messageid = None) -> None:
         self.channel = channel
         self.timestamp = timestamp
         self.i = i
         self.thumb = thumb
+        self.mode = mode
+        self.messageid = messageid
         super().__init__(title="Embed Builder")
     titel = discord.ui.TextInput(
         label="Titel:", placeholder="Setzte einen Titel", style=discord.TextStyle.short)
@@ -313,6 +315,11 @@ class EmbedBuilder(discord.ui.Modal):
 
         if self.thumb != None:
             embed.set_thumbnail(url=self.thumb)
+
+        if self.mode:
+            message = await self.channel.fetch_message(self.messageid)
+            await message.edit(embed=embed)
+            return await interaction.response.send_message("Embed bearbeitet", ephemeral=True)
 
         await interaction.response.send_message(embed=embed, view=EmbedBuilderView(channel=self.channel, embed=embed, timestamp=self.timestamp, i=self.i), ephemeral=True)
 
