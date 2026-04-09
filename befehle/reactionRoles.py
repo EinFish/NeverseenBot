@@ -171,7 +171,7 @@ class checkView(discord.ui.View):
 	def __init__(self, reactionList, channel, message_id):
 		super().__init__(timeout=None)
 		self.add_item(checkButtonsAccept("Korrekt", reactionList, message_id, channel))
-		self.add_item(checkButtonsDeny("Ändern", reactionList, channel))
+		self.add_item(checkButtonsDeny("Ändern", reactionList, channel, message_id))
 
 
 
@@ -193,16 +193,17 @@ class checkButtonsAccept(discord.ui.Button):
 
 
 class checkButtonsDeny(discord.ui.Button):
-	def __init__(self, text, reactionList, channel):
+	def __init__(self, text, reactionList, channel, message_id):
 		self.reactionList = reactionList
 		self.channel = channel
+		self.message_id = message_id
 		super().__init__(label=text, style=discord.ButtonStyle.danger)
 
 	async def callback(self, interaction: discord.Interaction) -> Any:
 
 		# BearbeitungsModal neu öffnen
 
-		return await interaction.response.send_modal(reactionCreateModal(self.channel, self.reactionList))
+		return await interaction.response.send_modal(reactionCreateModal(self.channel, self.reactionList, self.message_id))
 
 
 class linkRoleSelect(discord.ui.Select):

@@ -1,3 +1,5 @@
+import time
+
 import discord
 from discord.ext import commands
 from discord import app_commands, ui
@@ -17,6 +19,8 @@ async def status(self):
     member = bot.get_guild(1063567516737224805).get_member(959798444195721226)
     role = bot.get_guild(1063567516737224805).get_role(1086378080311972001)
     if str(member.status) == "offline":
+        time.sleep(15)
+        if str(member.status) != "offline": return
         channel = await bot.fetch_channel(1086735918494404651)
         await channel.send(f"{role.mention} Gyra ist Offline!")
         status.stop()
