@@ -51,6 +51,26 @@ class SetupCommands(discord.app_commands.Group):
         else:
             await interaction.response.send_message(content=f"Du hast keine Berechtigungen für diesen Command.", ephemeral=True)
 
+    @app_commands.command(name="log-ignore-users", description="Fügt User auf eine Liste hinzu, die der Log ignorieren soll.")
+    async def logIgnoreUsers(self, interaction: discord.Interaction, user: discord.Member):
+        if not interaction.user.guild_permissions.administrator:
+            return await interaction.response.send_message(content=f"Du hast keine Berechtigungen für diesen Command.", ephemeral=True)
+
+        with open("serverconfig.json") as file:
+            sjson = json.load(file)
+        try:
+            ignored_users = sjson[str(interaction.guild.id)]["log_ignored_users"]
+        except KeyError:
+            ignored_users = []
+        ignored_users.append(user.id)
+        sjson[str(interaction.guild.id)]["log_ignored_users"] = ignored_users
+
+        with open("serverconfig.json", "w") as json_file:
+            json.dump(sjson, json_file, indent=4)
+
+        await interaction.response.send_message(content="Erfolg!", ephemeral=True)
+
+
     @app_commands.command(name="welcome-channel", description="Passsdfn des Bots an deinen Server an")
     @commands.cooldown(1, 30, commands.BucketType.guild)
     async def welcomechannel(self, interaction, welcomechannel: discord.TextChannel):

@@ -29,6 +29,14 @@ class Automod(commands.Cog):
             return
         if before.author.bot:
             return
+
+        try:
+            ignored_users = sjson[str(guildid)]["log_ignored_users"]
+            if before.author.id in ignored_users:
+                return
+        except KeyError:
+            pass
+
         try:
             channel = after.guild.get_channel(
                 int(sjson[str(guildid)]["logchannel"]))
@@ -62,6 +70,15 @@ class Automod(commands.Cog):
             sjson = json.load(file)
 
         guildid = message.guild.id
+
+        try:
+            ignored_users = sjson[str(guildid)]["log_ignored_users"]
+            if message.author.id in ignored_users:
+                return
+        except KeyError:
+            pass
+
+
         try:
             channel = message.guild.get_channel(
                 int(sjson[str(guildid)]["logchannel"]))
